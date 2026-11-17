@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projet Visualisation de Données</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Usage de l’IA : visualisations</h1>
+    <nav id="nav"></nav>
+    <div class="data">
+      <span id="status">Chargement…</span>
+      <label class="btn">Charger un autre dataset (CSV / JSON)
+        <input id="file" type="file" accept=".csv,.json" hidden>
+      </label>
+    </div>
+  </header>
+  <main id="stage"></main>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
