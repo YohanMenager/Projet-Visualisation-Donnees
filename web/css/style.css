@@ -1,60 +1,22 @@
-#tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  #tabs button { padding: 8px 14px; border: 1px solid #b0b7c3; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-  #tabs button.active { background: #1f4e79; color: #fff; border-color: #1f4e79; }
-  .question { font-size: 0.95rem; margin: 0 0 4px; font-weight: 600; }
-  .vars { font-size: 0.82rem; color: #555; margin: 0 0 10px; }
-  .layout { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
-  .controls { display: flex; gap: 16px; align-items: center; margin-bottom: 8px; font-size: 0.88rem; flex-wrap: wrap; }
-  .note { font-size: 0.8rem; color: #555; max-width: 640px; line-height: 1.4; margin-top: 8px; }
-  .hint { color: #666; max-width: 320px; line-height: 1.4; font-size: 0.9rem; }
-  .error { color: #b00020; }
-  .card { background: #fff; border: 1px solid #d5d9e0; border-radius: 6px; padding: 10px 14px; font-size: 0.88rem; line-height: 1.5; margin-bottom: 10px; max-width: 380px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer; margin: 2px 0; }
-  .legend-item.off { opacity: 0.35; text-decoration: line-through; }
-  .legend-item i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
-  svg text { font-size: 11px; fill: #444; }
-  #tooltip { position: absolute; pointer-events: none; opacity: 0; background: #222; color: #fff; padding: 6px 9px; border-radius: 4px; font-size: 12px; line-height: 1.4; }
-
-
-/* ===== VUE ETUDIANTS ===== */
-
-.student-kpis {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin: 14px 0 20px;
-}
-
-.student-kpis .card {
-  min-width: 180px;
-  font-weight: 600;
-}
-
-.student-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
-  gap: 16px;
-  align-items: start;
-}
-
-.student-grid .card {
-  max-width: none;
-  min-width: 0;
-  margin-bottom: 0;
-}
-
-.student-grid h3 {
-  font-size: 0.95rem;
-  margin: 0 0 12px;
-}
-
-.student-grid svg {
-  max-width: 100%;
-  height: auto;
-}
-
-@media (max-width: 700px) {
-  .student-grid {
-    grid-template-columns: 1fr;
-  }
-}
+html, body { height: 100%; margin: 0; overflow: hidden; }
+  body { display: grid; grid-template-rows: auto 1fr; background: #eef1f5; font-family: system-ui, sans-serif; color: #222; }
+  header { background: #fff; border-bottom: 1px solid #d5d9e0; padding: 6px 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+  header h1 { font-size: 1rem; margin: 0 8px 0 0; }
+  header label { font-size: 0.78rem; display: flex; flex-direction: column; gap: 1px; color: #555; }
+  header select { font-size: 0.82rem; padding: 2px 4px; max-width: 150px; }
+  header .chk { flex-direction: row; align-items: center; gap: 4px; }
+  header button { font-size: 0.82rem; padding: 4px 10px; cursor: pointer; }
+  #count { margin-left: auto; font-size: 0.85rem; font-weight: 600; color: #1f4e79; }
+  main { display: grid; grid-template-columns: 1fr 1fr 1.1fr; grid-template-rows: 1.2fr 1fr; gap: 8px; padding: 8px; min-height: 0; }
+  .panel { background: #fff; border: 1px solid #d5d9e0; border-radius: 6px; display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: 6px 8px 4px; }
+  .head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-height: 32px; }
+  .head h2 { font-size: 0.86rem; margin: 0; }
+  .head .sub { font-size: 0.72rem; color: #666; }
+  .head .ctl { margin-left: auto; font-size: 0.72rem; display: flex; align-items: center; gap: 4px; }
+  .head select { font-size: 0.72rem; }
+  .chart { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+  .grad { display: inline-block; width: 60px; height: 8px; background: linear-gradient(to right, #f7fbff, #08306b); }
+  svg { display: block; }
+  svg text { font-size: 10px; fill: #444; }
+  #tooltip { position: absolute; pointer-events: none; opacity: 0; background: #222; color: #fff; padding: 5px 8px; border-radius: 4px; font-size: 12px; line-height: 1.35; z-index: 5; }
+  #message .error { color: #b00020; margin: 12px; }

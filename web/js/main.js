@@ -1,650 +1,253 @@
-/* ================= OUTILS COMMUNS ================= */
+/* ============================================================
+   1. ÉTAT ET OUTILS COMMUNS
+   ============================================================ */
 const NR = "Non renseigné";
-const tooltip = d3.select("#tooltip");
-const showTip = (event, html) => tooltip.style("opacity", 1).html(html)
-  .style("left", (event.pageX + 12) + "px").style("top", (event.pageY + 12) + "px");
-const hideTip = () => tooltip.style("opacity", 0);
-const f1 = d3.format(".1f");
-let data = [];
-
-const studentState = {outil: null, objectif: null, niveau: null, selectedId: null};
-
-// Graphique en barres horizontales : items = [{label, value}]
-function hbar(sel, items, {
-  title,
-  w = 380,
-  color = "#4e79a7",
-  onClick = null,
-  selected = null
-}) {
-  const h = Math.max(150, items.length * 32 + 55);
-
-  const svg = d3.select(sel)
-    .html("")
-    .append("svg")
-    .attr("width", w)
-    .attr("height", h);
-
-  const margin = { top: 30, right: 35, bottom: 10, left: 125 };
-
-  const max = d3.max(items, d => d.value) || 1;
-
-  const x = d3.scaleLinear()
-    .domain([0, max])
-    .range([0, w - margin.left - margin.right]);
-
-  const y = d3.scaleBand()
-    .domain(items.map(d => d.label))
-    .range([margin.top, h - margin.bottom])
-    .padding(0.2);
-
-  svg.append("text")
-    .attr("x", 10)
-    .attr("y", 18)
-    .text(title)
-    .attr("font-weight", "bold");
-
-  const bars = svg.selectAll(".bar")
-    .data(items)
-    .join("rect")
-    .attr("class", "bar")
-    .attr("x", margin.left)
-    .attr("y", d => y(d.label))
-    .attr("width", d => x(d.value))
-    .attr("height", y.bandwidth())
-    .attr("fill", color)
-    .attr("stroke", d => d.label === selected ? "#222" : "none")
-    .attr("stroke-width", 2)
-    .style("cursor", onClick ? "pointer" : "default");
-
-  if (onClick) {
-    bars.on("click", (event, d) => onClick(d));
-  }
-
-  svg.selectAll(".bar-label")
-    .data(items)
-    .join("text")
-    .attr("class", "bar-label")
-    .attr("x", d => margin.left + x(d.value) + 5)
-    .attr("y", d => y(d.label) + y.bandwidth() / 2 + 4)
-    .text(d => d.value);
-
-  svg.selectAll(".category-label")
-    .data(items)
-    .join("text")
-    .attr("class", "category-label")
-    .attr("x", margin.left - 8)
-    .attr("y", d => y(d.label) + y.bandwidth() / 2 + 4)
-    .attr("text-anchor", "end")
-    .text(d => d.label)
-    .style("cursor", onClick ? "pointer" : "default")
-    .on("click", onClick ? (event, d) => onClick(d) : null);
-}
-
-
-// Barres verticales : items = [{label, value}]
-function vbar(sel, items, { title, xLabel, yLabel, w = 380, h = 200, color = "#4e79a7" }) {
-  const box = d3.select(sel); box.selectAll("*").remove();
-  const m = { top: 28, right: 10, bottom: 40, left: 40 };
-  const iw = w - m.left - m.right, ih = h - m.top - m.bottom;
-  const svg = box.append("svg").attr("width", w).attr("height", h).append("g").attr("transform", `translate(${m.left},${m.top})`);
-  svg.append("text").attr("x", -m.left + 4).attr("y", -12).style("font-weight", 600).style("font-size", "12px").text(title);
-  const x = d3.scaleBand(items.map(d => d.label), [0, iw]).padding(0.15);
-  const y = d3.scaleLinear([0, d3.max(items, d => d.value) || 1], [ih, 0]).nice();
-  svg.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).tickSize(0));
-  svg.append("g").call(d3.axisLeft(y).ticks(4));
-  svg.selectAll("rect").data(items).join("rect").attr("x", d => x(d.label)).attr("y", d => y(d.value))
-    .attr("width", x.bandwidth()).attr("height", d => ih - y(d.value)).attr("fill", color);
-  svg.append("text").attr("x", iw / 2).attr("y", ih + 34).attr("text-anchor", "middle").text(xLabel);
-  svg.append("text").attr("transform", "rotate(-90)").attr("x", -ih / 2).attr("y", -30).attr("text-anchor", "middle").text(yLabel);
-}
-function axes(svg, x, y, w, h, xLabel, yLabel) {
-  svg.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(x).ticks(7));
-  svg.append("g").call(d3.axisLeft(y).ticks(6));
-  svg.append("g").attr("stroke", "#e6e8ec").selectAll("line").data(y.ticks(6)).join("line").attr("x2", w).attr("y1", d => y(d)).attr("y2", d => y(d));
-  svg.append("text").attr("x", w / 2).attr("y", h + 40).attr("text-anchor", "middle").text(xLabel);
-  svg.append("text").attr("transform", "rotate(-90)").attr("x", -h / 2).attr("y", -42).attr("text-anchor", "middle").text(yLabel);
-}
-
-function parseNumber(value) {
-  if (value == null || value.trim() === "") return NaN;
-  return +value;
-}
-
-/* ================= CHARGEMENT ================= */
-d3.csv("../data/dataset_clean.csv", d => ({
-  // Informations personnelles et profil
-  id: d.User_ID, 
-  age: +d.Age, 
-  genre: d.Genre,
-  pays: d.Pays, 
-  type: d["Type d'utilisateur"], 
-  edu: d["Niveau d'éducation"],
-  prof: d.Profession,
-  // Informations sur l'utilisation de l'IA
-  outil: d["IA utilisée"], 
-  objectif: d["Objectif d'utilisation de l'IA"], 
-  taches: d["Tâches effectuées"],
-
-  //Indicateurs quantitatifs
-  heures: +d["Utilisation par jour"],
-  gainTemps: +d["Gain de temps par semaine"],
-  heuresEtude: +d["Heures de travail ou d'étude par jour"],
-
-  // Évaluation de l'IA
-  prec: +d["Précision perçue"], 
-  sat: +d["Niveau de satisfaction"], 
-  profScore: +d["Score de productivité"],
-})).then(rows => {
-  data = rows;
-  const names = ["Développeurs IA", "Chercheurs", "Décideurs publics",  "Étudiants"];
-  d3.select("#tabs").selectAll("button").data(names).join("button").text(d => d)
-    .on("click", (e, d) => showTab(names.indexOf(d)));
-  showTab(0);
-  drawBubble(); drawScatter(); drawHeat(); drawStudents();
-}).catch(err => d3.select("#message").append("p").attr("class", "error")
-  .text("Impossible de charger dataset_clean.csv (lance un serveur local : python -m http.server). " + err.message));
-
-function showTab(i) {
-  d3.selectAll(".view").style("display", (_, k) => k === i ? "block" : "none");
-  d3.selectAll("#tabs button").classed("active", (_, k) => k === i);
-}
-
-
-function getFilteredStudents() {
-  return data.filter(d =>
-    d.type === "Étudiant" &&
-    (!studentState.outil || d.outil === studentState.outil) &&
-    (!studentState.objectif || d.objectif === studentState.objectif) &&
-    (!studentState.niveau || d.edu === studentState.niveau)
-  );
-}
-
-
-
-/* ================= VUE 1 : BUBBLE CHART (développeurs IA) ================= */
-let selTool = null;
-function drawBubble() {
-  const box = d3.select("#v0-chart"); box.selectAll("*").remove();
-  // Agrégation : un point par outil
-  const tools = d3.rollups(data.filter(d => d.outil !== NR),
-    g => ({ n: g.length, prec: d3.mean(g, d => d.prec), sat: d3.mean(g, d => d.sat) }), d => d.outil)
-    .map(([outil, v]) => ({ outil, ...v }));
-  const W = 640, H = 430, m = { top: 20, right: 30, bottom: 52, left: 58 }, w = W - m.left - m.right, h = H - m.top - m.bottom;
-  const x = d3.scaleLinear([d3.min(tools, d => d.prec) - 0.15, d3.max(tools, d => d.prec) + 0.15], [0, w]);
-  const y = d3.scaleLinear([d3.min(tools, d => d.sat) - 0.3, d3.max(tools, d => d.sat) + 0.3], [h, 0]);
-  const r = d3.scaleSqrt([0, d3.max(tools, d => d.n)], [0, 40]);
-  const color = d3.scaleOrdinal(d3.schemeTableau10).domain(tools.map(d => d.outil));
-  const svg = box.append("svg").attr("width", W).attr("height", H).append("g").attr("transform", `translate(${m.left},${m.top})`);
-  axes(svg, x, y, w, h, "Précision perçue moyenne (1 à 5)", "Satisfaction moyenne (1 à 10)");
-  tools.sort((a, b) => b.n - a.n);   // grandes bulles dessinées en premier
-  const g = svg.selectAll("g.b").data(tools).join("g").attr("class", "b").style("cursor", "pointer");
-  g.append("circle").attr("cx", d => x(d.prec)).attr("cy", d => y(d.sat)).attr("r", d => r(d.n))
-    .attr("fill", d => color(d.outil)).attr("fill-opacity", 0.72)
-    .attr("stroke", d => d.outil === selTool ? "#000" : "#fff").attr("stroke-width", d => d.outil === selTool ? 2.5 : 1);
-  // Étiquettes : couche séparée, au-dessus de toutes les bulles, avec un halo blanc pour rester lisibles
-  svg.selectAll("text.lab").data(tools).join("text").attr("class", "lab").style("pointer-events", "none")
-    .attr("x", d => x(d.prec) + r(d.n) + 4).attr("y", d => y(d.sat) + 4)
-    .style("paint-order", "stroke").style("stroke", "#fff").style("stroke-width", "3px").style("font-size", "11px").text(d => d.outil);
-  g.on("mousemove", (e, d) => showTip(e, `<b>${d.outil}</b><br>${d.n} utilisateurs<br>Précision : ${f1(d.prec)} / 5<br>Satisfaction : ${f1(d.sat)} / 10`))
-   .on("mouseout", hideTip)
-   .on("click", (e, d) => { selTool = d.outil; drawBubble(); drawToolDetail(); });
-  drawToolDetail();
-}
-function drawToolDetail() {
-  const box = d3.select("#v0-detail"); box.selectAll("*").remove();
-  if (!selTool) { box.append("p").attr("class", "hint").text("Clique sur une bulle pour voir la répartition des notes de satisfaction de cet outil."); return; }
-  const rows = data.filter(d => d.outil === selTool);
-  box.append("div").attr("class", "card").html(`<b>${selTool}</b><br>${rows.length} utilisateurs<br>Précision moyenne : ${f1(d3.mean(rows, d => d.prec))} / 5<br>Satisfaction moyenne : ${f1(d3.mean(rows, d => d.sat))} / 10`);
-  const counts = d3.rollup(rows, g => g.length, d => Math.round(d.sat));
-  const items = d3.range(3, 11).map(k => ({ label: String(k), value: counts.get(k) || 0 }));
-  box.append("div").attr("id", "v0-hist");
-  vbar("#v0-hist", items, { title: "Répartition des notes de satisfaction", xLabel: "Note de satisfaction", yLabel: "Utilisateurs", color: "#e15759" });
-}
-
-/* ================= VUE 2 : SCATTER PLOT (chercheurs) ================= */
-const hidden = new Set(); let selUser = null;
-function drawScatter() {
-  const cap = d3.select("#cap").property("checked");
-  const all = data.filter(d => Number.isFinite(d.heures) && Number.isFinite(d.sat) && (!cap || d.heures <= 12));
-  const objs = d3.rollups(all, g => g.length, d => d.objectif).sort((a, b) => b[1] - a[1]).map(d => d[0]);
-  const palette = d3.scaleOrdinal(d3.schemeTableau10).domain(objs.filter(o => o !== NR));
-  const color = o => o === NR ? "#9a9a9a" : palette(o);
-  const vis = all.filter(d => !hidden.has(d.objectif));
-
-  const box = d3.select("#v1-chart"); box.selectAll("*").remove();
-  const W = 560, H = 400, m = { top: 16, right: 20, bottom: 50, left: 55 }, w = W - m.left - m.right, h = H - m.top - m.bottom;
-  const x = d3.scaleLinear([0, d3.max(all, d => d.heures) + 0.5], [0, w]);
-  const y = d3.scaleLinear([2.5, 10.5], [h, 0]);
-  const svg = box.append("svg").attr("width", W).attr("height", H).append("g").attr("transform", `translate(${m.left},${m.top})`);
-  axes(svg, x, y, w, h, "Utilisation de l'IA (heures par jour)", "Niveau de satisfaction (1 à 10)");
-  svg.append("defs").append("clipPath").attr("id", "clip-sc").append("rect").attr("width", w).attr("height", h);
-
-  // Droite de régression (moindres carrés) et corrélation de Pearson sur les points visibles
-  const n = vis.length, mx = d3.mean(vis, d => d.heures), my = d3.mean(vis, d => d.sat);
-  const sxy = d3.sum(vis, d => (d.heures - mx) * (d.sat - my)), sxx = d3.sum(vis, d => (d.heures - mx) ** 2), syy = d3.sum(vis, d => (d.sat - my) ** 2);
-  const stat = d3.select("#v1-stat");
-  if (n > 2 && sxx > 0 && syy > 0) {
-    const slope = sxy / sxx, icpt = my - slope * mx, rr = sxy / Math.sqrt(sxx * syy);
-    const [x0, x1] = x.domain();
-    svg.append("line").attr("x1", x(x0)).attr("x2", x(x1)).attr("y1", y(icpt + slope * x0)).attr("y2", y(icpt + slope * x1))
-      .attr("stroke", "#333").attr("stroke-dasharray", "5 4").attr("stroke-width", 1.5).attr("clip-path", "url(#clip-sc)");
-    stat.html(`<b>Corrélation de Pearson r = ${rr.toFixed(2)}</b> (n = ${n}). Droite de régression en pointillés.`);
-  } else stat.text("Pas assez de points visibles pour calculer une corrélation.");
-
-  svg.selectAll("circle").data(vis).join("circle").attr("cx", d => x(d.heures)).attr("cy", d => y(d.sat)).attr("r", 4.5)
-    .attr("fill", d => color(d.objectif)).attr("fill-opacity", 0.55)
-    .attr("stroke", d => d.id === selUser ? "#000" : "none").attr("stroke-width", 2).style("cursor", "pointer")
-    .on("mousemove", (e, d) => showTip(e, `<b>${d.id}</b> · ${d.objectif}<br>${d.heures} h/jour · satisfaction ${d.sat}`))
-    .on("mouseout", hideTip)
-    .on("click", (e, d) => { selUser = d.id; drawScatter(); });
-
-  // Légende cliquable
-  const leg = d3.select("#v1-legend"); leg.selectAll("*").remove();
-  leg.append("div").style("font-weight", 600).style("font-size", "12px").style("margin-bottom", "4px").text("Objectif d'utilisation");
-  leg.selectAll("div.legend-item").data(objs).join("div").attr("class", d => "legend-item" + (hidden.has(d) ? " off" : ""))
-    .html(d => `<i style="background:${color(d)}"></i>${d} (${all.filter(r => r.objectif === d).length})`)
-    .on("click", (e, d) => { hidden.has(d) ? hidden.delete(d) : hidden.add(d); drawScatter(); });
-
-  // Second niveau : satisfaction moyenne par objectif + fiche utilisateur
-  const means = objs.map(o => ({ label: o, value: d3.mean(all.filter(d => d.objectif === o), d => d.sat), color: color(o), faded: hidden.has(o) }))
-    .sort((a, b) => b.value - a.value).map(d => ({ ...d, text: f1(d.value) }));
-  hbar("#v1-bars", means, { title: "Satisfaction moyenne par objectif", w: 400 });
-  const det = d3.select("#v1-detail"); det.selectAll("*").remove();
-  const u = data.find(d => d.id === selUser);
-  det.append(u ? "div" : "p").attr("class", u ? "card" : "hint")
-    .html(u ? `<b>${u.id}</b> · ${u.type}<br>Âge : ${Number.isFinite(u.age) ? u.age : NR} · Pays : ${u.pays}<br>Profession : ${u.prof}<br>Outil : ${u.outil} · Objectif : ${u.objectif}<br>${u.heures} h/jour · satisfaction ${u.sat} · précision ${u.prec}`
-                : "Clique sur un point pour afficher la fiche de l'utilisateur.");
-}
-d3.select("#cap").on("change", drawScatter);
-
-/* ================= VUE 3 : HEATMAP (décideurs publics) ================= */
-let selCell = null;
 const EDU = ["Lycée", "Études de premier cycle", "Licence", "Diplômé", "Master", "Doctorat"];
 const EDU_SHORT = { "Études de premier cycle": "1er cycle" };
+const f1 = d3.format(".1f");
+const tooltip = d3.select("#tooltip");
+const showTip = (e, html) => tooltip.style("opacity", 1).html(html).style("left", (e.pageX + 12) + "px").style("top", (e.pageY + 12) + "px");
+const hideTip = () => tooltip.style("opacity", 0);
+
+let data = [], paysOrder = [], objs = [], colorObj, colorTool;
+
+// Filtres globaux : partagés par les six vues
+const F = { type: null, edu: null, pays: null, outil: null, objectif: null, cap: false };
+let metric = "n";
+const KEY = { type: "type", edu: "edu", pays: "pays", outil: "outil", objectif: "objectif" };
+
+// Données filtrées. "skip" = filtres ignorés par la vue qui les pilote : elle montre alors
+// toutes les valeurs et met en évidence la sélection (on garde le contexte).
+function filtered(skip = []) {
+  return data.filter(d => Object.keys(KEY).every(k => skip.includes(k) || !F[k] || d[KEY[k]] === F[k])
+                          && (!F.cap || !(d.heures > 12)));
+}
+// Un clic sur un élément le transforme en filtre ; un second clic l'enlève
+function toggle(k, v) { F[k] = F[k] === v ? null : v; renderAll(); }
+
+// Crée un SVG à la taille du conteneur : le tableau de bord ne défile jamais
+function svgIn(sel) {
+  const el = document.querySelector(sel), w = el.clientWidth, h = el.clientHeight;
+  d3.select(el).selectAll("*").remove();
+  if (w < 20 || h < 20) return {};
+  return { svg: d3.select(el).append("svg").attr("width", w).attr("height", h), w, h };
+}
+const empty = (svg, w, h) => svg.append("text").attr("x", w / 2).attr("y", h / 2).attr("text-anchor", "middle").text("Aucun utilisateur pour ces filtres");
+
+// Barres horizontales cliquables : items = [{key, label, value, text, color, faded, tip}]
+function hbar(sel, items, { onClick, domain } = {}) {
+  const { svg, w, h } = svgIn(sel); if (!svg) return;
+  if (!items.length) return empty(svg, w, h);
+  const m = { top: 2, right: 34, bottom: 2, left: Math.min(150, w * 0.42) };
+  const y = d3.scaleBand(items.map(d => d.key), [m.top, h - m.bottom]).padding(0.18);
+  const x = d3.scaleLinear(domain || [0, d3.max(items, d => d.value) || 1], [0, w - m.left - m.right]);
+  const g = svg.selectAll("g.r").data(items).join("g").attr("class", "r").style("cursor", onClick ? "pointer" : "default")
+    .attr("opacity", d => d.faded ? 0.3 : 1);
+  const bh = Math.min(y.bandwidth(), 26), cy = d => y(d.key) + y.bandwidth() / 2;   // épaisseur limitée, barre centrée
+  g.append("rect").attr("x", m.left).attr("y", d => cy(d) - bh / 2).attr("height", bh).attr("width", d => x(d.value)).attr("fill", d => d.color);
+  g.append("text").attr("x", m.left - 5).attr("y", d => cy(d) + 3.5).attr("text-anchor", "end").text(d => d.label);
+  g.append("text").attr("x", d => m.left + x(d.value) + 4).attr("y", d => cy(d) + 3.5).text(d => d.text);
+  g.on("mousemove", (e, d) => showTip(e, d.tip || d.label)).on("mouseout", hideTip);
+  if (onClick) g.on("click", (e, d) => onClick(d.key));
+}
+
+/* ============================================================
+   2. CHARGEMENT DES DONNÉES
+   ============================================================ */
+d3.csv("../data/dataset_clean.csv", d => ({
+  id: d.User_ID, age: +d.Age, pays: d.Pays, type: d["Type d'utilisateur"], edu: d["Niveau d'éducation"],
+  outil: d["IA utilisée"], objectif: d["Objectif d'utilisation de l'IA"], heures: +d["Utilisation par jour"],
+  prec: +d["Précision perçue"], sat: +d["Niveau de satisfaction"], prof: d.Profession
+})).then(init).catch(err => d3.select("#message").append("p").attr("class", "error")
+  .text("Impossible de charger dataset_clean.csv (lance un serveur local : python -m http.server). " + err.message));
+
+function init(rows) {
+  data = rows;
+  const byCount = (arr, k) => d3.rollups(arr, g => g.length, d => d[k]).sort((a, b) => b[1] - a[1]).map(d => d[0]);
+  paysOrder = byCount(data.filter(d => d.pays !== NR && d.edu !== NR), "pays");
+  objs = byCount(data, "objectif");
+  const pal = d3.scaleOrdinal(d3.schemeTableau10).domain(objs.filter(o => o !== NR));
+  colorObj = o => o === NR ? "#9a9a9a" : pal(o);
+  const tools = byCount(data.filter(d => d.outil !== NR), "outil");
+  const palT = d3.scaleOrdinal(d3.schemeTableau10).domain(tools);
+  colorTool = t => palT(t);
+
+  // Menus de filtres
+  const fill = (k, values) => d3.select("#f-" + k).selectAll("option").data(["", ...values]).join("option")
+    .attr("value", d => d).text(d => d === "" ? "Tous" : d);
+  fill("type", ["Étudiant", "Professionnel"]);
+  fill("edu", EDU);
+  fill("pays", paysOrder);
+  fill("outil", tools);
+  fill("objectif", objs.filter(o => o !== NR));
+  for (const k of Object.keys(KEY)) d3.select("#f-" + k).on("change", function () { F[k] = this.value || null; renderAll(); });
+  d3.select("#f-cap").on("change", function () { F.cap = this.checked; renderAll(); });
+  d3.select("#metric").on("change", function () { metric = this.value; renderAll(); });
+  d3.select("#reset").on("click", () => { Object.keys(KEY).forEach(k => F[k] = null); F.cap = false; renderAll(); });
+
+  // Chaque vue se redessine quand la taille de son panneau change
+  const draws = { c0: drawBubble, c1: drawScatter, c2: drawHeat, c3: drawHist, c4: drawObjBars, c5: drawToolBars };
+  for (const [id, fn] of Object.entries(draws)) new ResizeObserver(() => fn()).observe(document.getElementById(id));
+  renderAll();
+}
+
+// Redessine toutes les vues à partir de l'état des filtres
+function renderAll() {
+  for (const k of Object.keys(KEY)) d3.select("#f-" + k).property("value", F[k] || "");
+  d3.select("#f-cap").property("checked", F.cap);
+  d3.select("#metric").property("value", metric);
+  d3.select("#count").text(`${filtered().length} / ${data.length} utilisateurs`);
+  drawBubble(); drawScatter(); drawHeat(); drawHist(); drawObjBars(); drawToolBars();
+}
+
+/* ============================================================
+   3. VUE 1 : BUBBLE CHART (outils) : précision × satisfaction, taille = effectif
+   ============================================================ */
+function drawBubble() {
+  const { svg, w, h } = svgIn("#c0"); if (!svg) return;
+  const rows = filtered(["outil"]).filter(d => d.outil !== NR && Number.isFinite(d.prec) && Number.isFinite(d.sat));
+  const tools = d3.rollups(rows, g => ({ n: g.length, prec: d3.mean(g, d => d.prec), sat: d3.mean(g, d => d.sat) }), d => d.outil)
+    .map(([outil, v]) => ({ outil, ...v })).sort((a, b) => b.n - a.n);
+  if (!tools.length) return empty(svg, w, h);
+  const m = { top: 10, right: 18, bottom: 36, left: 42 }, iw = w - m.left - m.right, ih = h - m.top - m.bottom;
+  const pad = (e, p) => e[1] - e[0] < 1e-6 ? [e[0] - 0.5, e[1] + 0.5] : [e[0] - (e[1] - e[0]) * p, e[1] + (e[1] - e[0]) * p];
+  const x = d3.scaleLinear(pad(d3.extent(tools, d => d.prec), 0.25), [0, iw]);
+  const y = d3.scaleLinear(pad(d3.extent(tools, d => d.sat), 0.25), [ih, 0]);
+  const r = d3.scaleSqrt([0, d3.max(tools, d => d.n)], [0, Math.min(iw, ih) * 0.13]);   // aire proportionnelle à l'effectif
+  const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
+  g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).ticks(5));
+  g.append("g").call(d3.axisLeft(y).ticks(5));
+  g.append("text").attr("x", iw / 2).attr("y", ih + 30).attr("text-anchor", "middle").text("Précision perçue moyenne (1 à 5)");
+  g.append("text").attr("transform", "rotate(-90)").attr("x", -ih / 2).attr("y", -32).attr("text-anchor", "middle").text("Satisfaction moyenne (1 à 10)");
+  const faded = d => F.outil && F.outil !== d.outil;
+  const rad = d => Math.max(4, r(d.n));
+  g.selectAll("circle").data(tools).join("circle").style("cursor", "pointer")
+    .attr("cx", d => x(d.prec)).attr("cy", d => y(d.sat)).attr("r", rad)
+    .attr("fill", d => colorTool(d.outil)).attr("fill-opacity", d => faded(d) ? 0.2 : 0.75)
+    .attr("stroke", d => d.outil === F.outil ? "#000" : "#fff").attr("stroke-width", d => d.outil === F.outil ? 2.5 : 1)
+    .on("mousemove", (e, d) => showTip(e, `<b>${d.outil}</b><br>${d.n} utilisateurs<br>Précision : ${f1(d.prec)} / 5<br>Satisfaction : ${f1(d.sat)} / 10`))
+    .on("mouseout", hideTip).on("click", (e, d) => toggle("outil", d.outil));
+  // Étiquettes au-dessus des bulles, avec un halo blanc pour rester lisibles
+  const right = d => x(d.prec) > iw * 0.7;
+  g.selectAll("text.lab").data(tools).join("text").attr("class", "lab").style("pointer-events", "none")
+    .attr("x", d => right(d) ? x(d.prec) - rad(d) - 4 : x(d.prec) + rad(d) + 4)
+    .attr("text-anchor", d => right(d) ? "end" : "start").attr("y", d => y(d.sat) + 3.5)
+    .style("paint-order", "stroke").style("stroke", "#fff").style("stroke-width", "3px")
+    .attr("opacity", d => faded(d) ? 0.4 : 1).text(d => d.outil);
+}
+
+/* ============================================================
+   4. VUE 2 : SCATTER PLOT : heures d'usage × satisfaction, couleur = objectif
+   ============================================================ */
+function drawScatter() {
+  const { svg, w, h } = svgIn("#c1"); if (!svg) return;
+  const base = filtered(["objectif"]).filter(d => Number.isFinite(d.heures) && Number.isFinite(d.sat));
+  if (!base.length) return empty(svg, w, h);
+  const m = { top: 10, right: 12, bottom: 36, left: 40 }, iw = w - m.left - m.right, ih = h - m.top - m.bottom;
+  const xmax = d3.max(data.filter(d => !F.cap || !(d.heures > 12)), d => d.heures) + 0.5;   // échelle stable quel que soit le filtre
+  const x = d3.scaleLinear([0, xmax], [0, iw]), y = d3.scaleLinear([2.5, 10.5], [ih, 0]);
+  const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
+  g.append("defs").append("clipPath").attr("id", "clip-sc").append("rect").attr("width", iw).attr("height", ih);
+  g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).ticks(6));
+  g.append("g").call(d3.axisLeft(y).ticks(8));
+  g.append("text").attr("x", iw / 2).attr("y", ih + 30).attr("text-anchor", "middle").text("Utilisation de l'IA (heures par jour)");
+  g.append("text").attr("transform", "rotate(-90)").attr("x", -ih / 2).attr("y", -30).attr("text-anchor", "middle").text("Satisfaction (1 à 10)");
+  // Les points de l'objectif choisi sont mis en avant, les autres estompés
+  const inSel = d => !F.objectif || d.objectif === F.objectif;
+  const sel = base.filter(inSel), other = base.filter(d => !inSel(d));
+  const dots = (arr, op, cls) => g.selectAll("circle." + cls).data(arr).join("circle").attr("class", cls)
+    .attr("cx", d => x(d.heures)).attr("cy", d => y(d.sat)).attr("r", 3.5).attr("fill", d => colorObj(d.objectif)).attr("fill-opacity", op)
+    .on("mousemove", (e, d) => showTip(e, `<b>${d.id}</b> · ${d.type}<br>${d.objectif} · ${d.outil}<br>${d.heures} h/jour · satisfaction ${d.sat}`))
+    .on("mouseout", hideTip);
+  dots(other, 0.1, "o"); dots(sel, 0.6, "s");
+  // Corrélation de Pearson et droite de régression sur les points de la sélection
+  const n = sel.length, mx = d3.mean(sel, d => d.heures), my = d3.mean(sel, d => d.sat);
+  const sxy = d3.sum(sel, d => (d.heures - mx) * (d.sat - my)), sxx = d3.sum(sel, d => (d.heures - mx) ** 2), syy = d3.sum(sel, d => (d.sat - my) ** 2);
+  let label = `n = ${n}`;
+  if (n > 2 && sxx > 0 && syy > 0) {
+    const sl = sxy / sxx, ic = my - sl * mx;
+    g.append("line").attr("clip-path", "url(#clip-sc)").attr("x1", x(0)).attr("x2", x(xmax)).attr("y1", y(ic)).attr("y2", y(ic + sl * xmax))
+      .attr("stroke", "#333").attr("stroke-dasharray", "5 4");
+    label = `r = ${(sxy / Math.sqrt(sxx * syy)).toFixed(2)} · n = ${n}`;
+  }
+  g.append("text").attr("x", iw - 4).attr("y", 12).attr("text-anchor", "end").style("font-weight", 600).style("font-size", "11px").text(label);
+}
+
+/* ============================================================
+   5. VUE 3 : HEATMAP : pays × niveau d'éducation
+   ============================================================ */
 function drawHeat() {
-  const metric = d3.select("#metric").property("value"), utype = d3.select("#utype").property("value");
-  const base = data.filter(d => d.pays !== NR && d.edu !== NR);
-  const rows = utype === "all" ? base : base.filter(d => d.type === utype);
-  const pays = d3.rollups(base, g => g.length, d => d.pays).sort((a, b) => b[1] - a[1]).map(d => d[0]);
+  const { svg, w, h } = svgIn("#c2"); if (!svg) return;
+  const base = filtered(["pays", "edu"]).filter(d => d.pays !== NR && d.edu !== NR);
   const cells = [];
-  for (const p of pays) for (const e of EDU) {
-    const g = rows.filter(d => d.pays === p && d.edu === e);
-    const h = g.length ? d3.mean(g.filter(d => Number.isFinite(d.heures)), d => d.heures) : NaN;
-    cells.push({ p, e, n: g.length, h, value: metric === "n" ? g.length : h });
+  for (const p of paysOrder) for (const e of EDU) {
+    const g = base.filter(d => d.pays === p && d.edu === e), hs = g.filter(d => Number.isFinite(d.heures));
+    cells.push({ p, e, n: g.length, h: hs.length ? d3.mean(hs, d => d.heures) : NaN });
   }
-  const finite = cells.map(c => c.value).filter(Number.isFinite);
-  const color = d3.scaleSequential(d3.interpolateBlues).domain([0, d3.max(finite) || 1]);
-  const m = { top: 58, right: 10, bottom: 8, left: 90 }, cw = 84, ch = 30;
-  const w = EDU.length * cw, h = pays.length * ch;
-  const box = d3.select("#v2-chart"); box.selectAll("*").remove();
-  const svg = box.append("svg").attr("width", m.left + w + m.right).attr("height", m.top + h + m.bottom).append("g").attr("transform", `translate(${m.left},${m.top})`);
-  const x = d3.scaleBand(EDU, [0, w]).padding(0.05), y = d3.scaleBand(pays, [0, h]).padding(0.05);
-  svg.append("g").call(d3.axisTop(x).tickSize(0).tickFormat(e => EDU_SHORT[e] || e)).call(g => g.select(".domain").remove());
-  svg.append("g").call(d3.axisLeft(y).tickSize(0)).call(g => g.select(".domain").remove());
-  const label = c => !Number.isFinite(c.value) || (metric === "n" && c.n === 0) ? "" : metric === "n" ? c.n : f1(c.value);
-  const g = svg.selectAll("g.c").data(cells).join("g").attr("class", "c").style("cursor", "pointer");
-  g.append("rect").attr("x", c => x(c.e)).attr("y", c => y(c.p)).attr("width", x.bandwidth()).attr("height", y.bandwidth())
-    .attr("fill", c => Number.isFinite(c.value) && !(metric === "n" && c.n === 0) ? color(c.value) : "#ececec")
-    .attr("stroke", c => selCell && selCell.p === c.p && selCell.e === c.e ? "#000" : "none").attr("stroke-width", 2);
-  g.append("text").attr("x", c => x(c.e) + x.bandwidth() / 2).attr("y", c => y(c.p) + y.bandwidth() / 2 + 4).attr("text-anchor", "middle")
-    .style("fill", c => Number.isFinite(c.value) && c.value > color.domain()[1] * 0.55 ? "#fff" : "#222").text(label);
-  g.on("mousemove", (ev, c) => showTip(ev, `<b>${c.p} · ${c.e}</b><br>${c.n} répondants<br>Usage moyen : ${Number.isFinite(c.h) ? f1(c.h) + " h/jour" : "n/a"}`))
-   .on("mouseout", hideTip)
-   .on("click", (ev, c) => { selCell = { p: c.p, e: c.e }; drawHeat(); });
-
-  // Légende
-  const lg = d3.select("#v2-legend"); lg.selectAll("*").remove();
-  const LW = 240, s = lg.append("svg").attr("width", LW + 40).attr("height", 48);
-  const gr = s.append("defs").append("linearGradient").attr("id", "hg");
-  d3.range(0, 1.01, 0.1).forEach(t => gr.append("stop").attr("offset", `${t * 100}%`).attr("stop-color", d3.interpolateBlues(t)));
-  s.append("text").attr("x", 20).attr("y", 10).text(metric === "n" ? "Nombre de répondants" : "Utilisation moyenne (h par jour)");
-  const lgg = s.append("g").attr("transform", "translate(20,16)");
-  lgg.append("rect").attr("width", LW).attr("height", 12).attr("fill", "url(#hg)");
-  lgg.append("g").attr("transform", "translate(0,12)").call(d3.axisBottom(d3.scaleLinear(color.domain(), [0, LW])).ticks(5).tickSize(3)).call(a => a.select(".domain").remove());
-
-  // Second niveau : détails de la case sélectionnée
-  const det = d3.select("#v2-detail"); det.selectAll("*").remove();
-  if (!selCell) { det.append("p").attr("class", "hint").text("Clique sur une case pour voir le détail : profils et outils utilisés."); return; }
-  const sel = rows.filter(d => d.pays === selCell.p && d.edu === selCell.e);
-  const stud = sel.filter(d => d.type === "Étudiant").length;
-  det.append("div").attr("class", "card").html(`<b>${selCell.p} · ${selCell.e}</b><br>${sel.length} répondants` + (sel.length ? `<br>Étudiants : ${stud} · Professionnels : ${sel.length - stud}<br>Usage moyen : ${f1(d3.mean(sel.filter(d => Number.isFinite(d.heures)), d => d.heures))} h par jour` : ""));
-  if (sel.length) {
-    const items = d3.rollups(sel, v => v.length, d => d.outil).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
-    det.append("div").attr("id", "v2-tools");
-    hbar("#v2-tools", items, { title: "Outils utilisés dans cette case", color: "#59a14f" });
-  }
-}
-d3.select("#metric").on("change", drawHeat);
-d3.select("#utype").on("change", drawHeat);
-
-
-/* ================= VUE 4 : ETUDIANTS ================= */
-function drawStudents() {
-  updateStudents();
-  d3.select("#reset-student-filters")
-  .on("click", () => {
-    studentState.outil = null;
-    studentState.objectif = null;
-    studentState.niveau = null;
-    studentState.selectedId = null;
-    updateStudents();
-  });
-}
-
-function updateStudents() {
-  const students = getFilteredStudents();
-
-  // Mise à jour des indicateurs
-  d3.select("#student-total").text(students.length);
-
-  const avgTime = d3.mean(students, d => d.gainTemps);
-
-  d3.select("#student-time")
-    .text(avgTime == null ? "—" : avgTime.toFixed(1));
-
-  // Comptage des outils
-  const tools = Array.from(
-    d3.rollup(
-      students.filter(d => d.outil && d.outil !== NR),
-      v => v.length,
-      d => d.outil
-    ),
-    ([label, value]) => ({ label, value })
-  ).sort((a, b) => b.value - a.value);
-
-  // Comptage des objectifs
-  const objectives = Array.from(
-    d3.rollup(
-      students.filter(d => d.objectif && d.objectif !== NR),
-      v => v.length,
-      d => d.objectif
-    ),
-    ([label, value]) => ({ label, value })
-  ).sort((a, b) => b.value - a.value);
-
-  // Graphique des outils : cliquer filtre les autres graphiques
-  hbar("#student-tools", tools, {
-    title: "Outils d'IA utilisés",
-    onClick: d => {
-      studentState.outil =
-        studentState.outil === d.label ? null : d.label;
-      updateStudents();
-    },
-    selected: studentState.outil
-  });
-
-  // Graphique des objectifs : cliquer filtre les autres graphiques
-  hbar("#student-objectives", objectives, {
-    title: "Objectifs d'utilisation",
-    onClick: d => {
-      studentState.objectif =
-        studentState.objectif === d.label ? null : d.label;
-      updateStudents();
-    },
-    selected: studentState.objectif
-  });
-
-  // Graphique de dispersion
-  drawStudentScatter(students);
-  drawStudentEducation(students);
-
-  // Détail de l'étudiant sélectionné
-  const selected = students.find(d => d.id === studentState.selectedId);
-
-  if (selected) {
-    showStudentDetail(selected);
-  } else if (students.length > 0) {
-    showStudentDetail(students[0]);
-  } else {
-    d3.select("#student-detail")
-      .html("<p>Aucun étudiant ne correspond aux filtres sélectionnés.</p>");
-  }
-}
-
-function drawStudentScatter(students) {
-  const container = d3.select("#student-scatter");
-  container.html("");
-
-  const valid = students.filter(d =>
-    Number.isFinite(d.heures) &&
-    Number.isFinite(d.gainTemps)
-  );
-
-  const width = 500;
-  const height = 320;
-  const margin = { top: 25, right: 25, bottom: 55, left: 60 };
-
-  const svg = container.append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", "100%")
-    .attr("height", height);
-
-  const x = d3.scaleLinear()
-    .domain([0, d3.max(valid, d => d.heures) || 1])
-    .nice()
-    .range([margin.left, width - margin.right]);
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(valid, d => d.gainTemps) || 1])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
-
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x));
-
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y));
-
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height - 10)
-    .attr("text-anchor", "middle")
-    .text("Utilisation de l'IA par jour");
-
-  svg.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -height / 2)
-    .attr("y", 16)
-    .attr("text-anchor", "middle")
-    .text("Gain de temps déclaré");
-
-  svg.selectAll("circle")
-    .data(valid)
-    .join("circle")
-    .attr("cx", d => x(d.heures))
-    .attr("cy", d => y(d.gainTemps))
-    .attr("r", d => d.id === studentState.selectedId ? 8 : 5)
-    .attr("fill", d => d.id === studentState.selectedId ? "#e45756" : "#4e79a7")
-    .attr("stroke", "#fff")
-    .attr("stroke-width", 1.5)
-    .style("cursor", "pointer")
-    .on("click", (event, d) => {
-      studentState.selectedId = d.id;
-      showStudentDetail(d);
-      drawStudentScatter(students);
+  cells.forEach(c => c.value = metric === "n" ? c.n : c.h);
+  const vmax = d3.max(cells, c => c.value) || 1;
+  const color = d3.scaleSequential(d3.interpolateBlues).domain([0, vmax]);
+  d3.select("#lgmax").text(f1(vmax).replace(".0", ""));
+  const m = { top: 22, right: 4, bottom: 4, left: 70 }, iw = w - m.left - m.right, ih = h - m.top - m.bottom;
+  const x = d3.scaleBand(EDU, [0, iw]).padding(0.06), y = d3.scaleBand(paysOrder, [0, ih]).padding(0.06);
+  const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
+  g.append("g").call(d3.axisTop(x).tickSize(0).tickFormat(e => EDU_SHORT[e] || e)).call(a => a.select(".domain").remove());
+  g.append("g").call(d3.axisLeft(y).tickSize(0)).call(a => a.select(".domain").remove());
+  const active = c => (!F.pays || c.p === F.pays) && (!F.edu || c.e === F.edu);
+  const anySel = F.pays || F.edu, exact = F.pays && F.edu;
+  const has = c => Number.isFinite(c.value) && !(metric === "n" && c.n === 0);
+  const cg = g.selectAll("g.c").data(cells).join("g").attr("class", "c").style("cursor", "pointer")
+    .attr("opacity", c => anySel && !active(c) ? 0.35 : 1);
+  cg.append("rect").attr("x", c => x(c.e)).attr("y", c => y(c.p)).attr("width", x.bandwidth()).attr("height", y.bandwidth())
+    .attr("fill", c => has(c) ? color(c.value) : "#ececec").attr("stroke", c => exact && active(c) ? "#000" : "none").attr("stroke-width", 2);
+  cg.append("text").attr("x", c => x(c.e) + x.bandwidth() / 2).attr("y", c => y(c.p) + y.bandwidth() / 2 + 3.5).attr("text-anchor", "middle")
+    .style("fill", c => has(c) && c.value > vmax * 0.55 ? "#fff" : "#222").text(c => !has(c) ? "" : metric === "n" ? c.n : f1(c.value));
+  cg.on("mousemove", (ev, c) => showTip(ev, `<b>${c.p} · ${c.e}</b><br>${c.n} répondants<br>Usage moyen : ${Number.isFinite(c.h) ? f1(c.h) + " h/jour" : "n/a"}`))
+    .on("mouseout", hideTip)
+    .on("click", (ev, c) => {   // la case fixe deux filtres à la fois : pays et niveau d'éducation
+      if (F.pays === c.p && F.edu === c.e) { F.pays = null; F.edu = null; } else { F.pays = c.p; F.edu = c.e; }
+      renderAll();
     });
 }
 
-function drawStudentEducation(students) {
-  const container = d3.select("#student-education");
-  container.html("");
-
-  // IMPORTANT : calculer les niveaux sur tous les étudiants,
-  // en tenant compte des filtres outil et objectif,
-  // mais sans appliquer le filtre niveau lui-même.
-  const base = data.filter(d =>
-    d.type === "Étudiant" &&
-    (!studentState.outil || d.outil === studentState.outil) &&
-    (!studentState.objectif || d.objectif === studentState.objectif)
-  );
-
-  const levels = Array.from(
-    d3.group(base, d => d.edu || NR),
-    ([level, rows]) => ({
-      level,
-      count: rows.length,
-      satisfaction: d3.mean(
-        rows.filter(d => Number.isFinite(d.sat) && d.sat >= 1 && d.sat <= 10),
-        d => d.sat
-      ),
-      productivity: d3.mean(
-        rows.filter(d => Number.isFinite(d.profScore) &&
-          d.profScore >= 1 && d.profScore <= 10),
-        d => d.profScore
-      )
-    })
-  ).sort((a, b) => b.count - a.count);
-
-  if (levels.length === 0) {
-    container.append("p").text("Aucune donnée disponible.");
-    return;
-  }
-
-  // Indication du filtre actif
-  container.append("p")
-    .attr("class", "hint")
-    .text(
-      studentState.niveau
-        ? `Niveau sélectionné : ${studentState.niveau} — cliquez à nouveau pour retirer le filtre.`
-        : "Cliquez sur un niveau d'études pour filtrer les autres graphiques."
-    );
-
-  const width = 650;
-  const margin = { top: 45, right: 65, bottom: 35, left: 145 };
-  const rowHeight = 55;
-  const height = margin.top + margin.bottom + levels.length * rowHeight;
-
-  const series = [
-    { key: "satisfaction", label: "Satisfaction", color: "#4e79a7" },
-    { key: "productivity", label: "Productivité", color: "#f28e2b" }
-  ];
-
-  const svg = container.append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", "100%")
-    .attr("height", height);
-
-  const x = d3.scaleLinear()
-    .domain([0, 10])
-    .range([margin.left, width - margin.right]);
-
-  const y = d3.scaleBand()
-    .domain(levels.map(d => d.level))
-    .range([margin.top, height - margin.bottom])
-    .padding(0.25);
-
-  const ySub = d3.scaleBand()
-    .domain(series.map(d => d.key))
-    .range([0, y.bandwidth()])
-    .padding(0.12);
-
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(5));
-
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y));
-
-  const legend = svg.append("g")
-    .attr("transform", `translate(${margin.left},18)`);
-
-  series.forEach((s, i) => {
-    const item = legend.append("g")
-      .attr("transform", `translate(${i * 155},0)`);
-
-    item.append("rect")
-      .attr("width", 12)
-      .attr("height", 12)
-      .attr("fill", s.color);
-
-    item.append("text")
-      .attr("x", 18)
-      .attr("y", 10)
-      .style("font-size", "12px")
-      .text(s.label);
-  });
-
-  const groups = svg.selectAll(".education-group")
-    .data(levels)
-    .join("g")
-    .attr("class", "education-group")
-    .attr("transform", d => `translate(0,${y(d.level)})`)
-    .style("cursor", "pointer")
-    .on("click", (event, d) => {
-      studentState.niveau =
-        studentState.niveau === d.level ? null : d.level;
-
-      studentState.selectedId = null;
-      updateStudents();
-    });
-
-  groups.selectAll("rect")
-    .data(d => series.map(s => ({
-      level: d.level,
-      key: s.key,
-      color: s.color,
-      value: d[s.key]
-    })))
-    .join("rect")
-    .attr("x", margin.left)
-    .attr("y", d => ySub(d.key))
-    .attr("width", d => d.value == null ? 0 : x(d.value) - margin.left)
-    .attr("height", ySub.bandwidth())
-    .attr("rx", 3)
-    .attr("fill", d => d.color)
-    .attr("opacity", d =>
-      studentState.niveau && studentState.niveau !== d.level ? 0.3 : 1
-    );
-
-  groups.selectAll(".value-label")
-    .data(d => series.map(s => ({
-      level: d.level,
-      key: s.key,
-      value: d[s.key]
-    })))
-    .join("text")
-    .attr("class", "value-label")
-    .attr("x", d => d.value == null ? margin.left + 5 : x(d.value) + 5)
-    .attr("y", d => ySub(d.key) + ySub.bandwidth() / 2 + 4)
-    .style("font-size", "11px")
-    .text(d => d.value == null ? "N/A" : d.value.toFixed(1));
-
-  groups.append("text")
-    .attr("x", width - margin.right + 5)
-    .attr("y", y.bandwidth() / 2 + 4)
-    .style("font-size", "11px")
-    .text(d => `n=${d.count}`);
+/* ============================================================
+   6. VUES DE DÉTAILS : histogramme, objectifs, outils
+   ============================================================ */
+function drawHist() {
+  const rows = filtered().filter(d => Number.isFinite(d.sat));
+  d3.select("#t3").text("Notes de satisfaction : " + (F.outil || "tous les outils"));
+  d3.select("#s3").text(rows.length ? `moyenne ${f1(d3.mean(rows, d => d.sat))} · n = ${rows.length}` : "");
+  const { svg, w, h } = svgIn("#c3"); if (!svg) return;
+  if (!rows.length) return empty(svg, w, h);
+  const counts = d3.rollup(rows, g => g.length, d => Math.round(d.sat));
+  const items = d3.range(3, 11).map(k => ({ k, v: counts.get(k) || 0 }));
+  const m = { top: 6, right: 8, bottom: 30, left: 32 }, iw = w - m.left - m.right, ih = h - m.top - m.bottom;
+  const x = d3.scaleBand(items.map(d => d.k), [0, iw]).padding(0.15), y = d3.scaleLinear([0, d3.max(items, d => d.v) || 1], [ih, 0]).nice();
+  const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
+  g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).tickSize(0));
+  g.append("g").call(d3.axisLeft(y).ticks(Math.min(4, d3.max(items, d => d.v) || 1)).tickFormat(d3.format("d")));
+  g.selectAll("rect").data(items).join("rect").attr("x", d => x(d.k)).attr("y", d => y(d.v)).attr("width", x.bandwidth()).attr("height", d => ih - y(d.v))
+    .attr("fill", F.outil ? colorTool(F.outil) : "#4e79a7")
+    .on("mousemove", (e, d) => showTip(e, `Note ${d.k} : ${d.v} utilisateurs`)).on("mouseout", hideTip);
+  g.append("text").attr("x", iw / 2).attr("y", ih + 26).attr("text-anchor", "middle").text("Note de satisfaction");
 }
 
+function drawObjBars() {
+  const rows = filtered(["objectif"]).filter(d => Number.isFinite(d.sat));
+  const items = objs.map(o => { const g = rows.filter(d => d.objectif === o); return { o, n: g.length, mean: g.length ? d3.mean(g, d => d.sat) : 0 }; })
+    .filter(d => d.n > 0).sort((a, b) => b.mean - a.mean)
+    .map(d => ({ key: d.o, label: `${d.o} (${d.n})`, value: d.mean, text: f1(d.mean), color: colorObj(d.o), faded: F.objectif && F.objectif !== d.o,
+                 tip: `<b>${d.o}</b><br>${d.n} utilisateurs<br>Satisfaction moyenne : ${f1(d.mean)}` }));
+  hbar("#c4", items, { onClick: k => toggle("objectif", k), domain: [0, 10] });
+}
 
-
-
-/* ---------- FICHE D'UN ÉTUDIANT SÉLECTIONNÉ ---------- */
-
-function showStudentDetail(student) {
-
-  const detail = d3.select("#student-detail");
-
-  const display = value =>
-    value && value.trim() !== "" ? value : NR;
-
-  detail.html(`
-    <b>Identifiant :</b> ${display(student.id)}<br>
-    <b>Niveau d'éducation :</b> ${display(student.edu)}<br>
-    <b>Outil utilisé :</b> ${display(student.outil)}<br>
-    <b>Objectif :</b> ${display(student.objectif)}<br>
-    <b>Tâches effectuées :</b> ${display(student.taches)}<br>
-    <b>Utilisation quotidienne :</b>
-    ${Number.isFinite(student.heures) ? f1(student.heures) + " h" : NR}<br>
-    <b>Gain de temps déclaré :</b>
-    ${Number.isFinite(student.gainTemps) ? f1(student.gainTemps) : NR}<br>
-    <b>Satisfaction :</b>
-    ${Number.isFinite(student.sat) ? f1(student.sat) + " / 10" : NR}<br>
-    <b>Productivité :</b>
-    ${Number.isFinite(student.profScore) ? f1(student.profScore) + " / 10" : NR}
-  `);
+function drawToolBars() {
+  const rows = filtered();
+  const st = rows.filter(d => d.type === "Étudiant").length, hs = rows.filter(d => Number.isFinite(d.heures));
+  d3.select("#s5").text(rows.length
+    ? `${rows.length} utilisateurs · ${Math.round(100 * st / rows.length)} % étudiants` + (hs.length ? ` · ${f1(d3.mean(hs, d => d.heures))} h/jour` : "") + " · clic = filtrer"
+    : "clic = filtrer");
+  const items = d3.rollups(rows.filter(d => d.outil !== NR), g => g.length, d => d.outil).sort((a, b) => b[1] - a[1]).slice(0, 8)
+    .map(([t, n]) => ({ key: t, label: t, value: n, text: n, color: colorTool(t), faded: F.outil && F.outil !== t, tip: `<b>${t}</b><br>${n} utilisateurs` }));
+  hbar("#c5", items, { onClick: k => toggle("outil", k) });
 }
