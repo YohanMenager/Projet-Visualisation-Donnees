@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage de l'IA : quatre vues pour quatre publics</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<h1>Usage de l'IA : quatre vues pour quatre publics</h1>
+<div id="tabs"></div>
+<div id="message"></div>
+
+<!-- ============ VUE 1 : Développeurs IA (bubble chart) ============ -->
+<div class="view" id="view0">
+  <p class="question">Quels outils d'IA sont les mieux évalués ?</p>
+  <p class="vars">Variables : IA utilisée, précision perçue, niveau de satisfaction · Technique : bubble chart</p>
+  <div class="layout"><div id="v0-chart"></div><div id="v0-detail"></div></div>
+  <p class="note">Une bulle = un outil. Position : précision perçue (x) et satisfaction (y) moyennes ; taille : nombre d'utilisateurs ; couleur : outil. Les utilisateurs sans outil renseigné sont exclus. Attention : les axes sont zoomés sur l'intervalle des moyennes ; les écarts entre outils sont faibles (quelques dixièmes de point).</p>
+</div>
+
+<!-- ============ VUE 2 : Chercheurs (scatter plot) ============ -->
+<div class="view" id="view1" style="display:none">
+  <p class="question">Quels facteurs sont associés à la satisfaction ?</p>
+  <p class="vars">Variables : utilisation par jour, niveau de satisfaction, objectif d'utilisation · Technique : scatter plot</p>
+  <div class="controls"><label><input type="checkbox" id="cap"> Exclure les usages &gt; 12 h par jour (valeurs probablement aberrantes)</label></div>
+  <div class="layout">
+    <div><div id="v1-chart"></div><div id="v1-stat" class="note"></div></div>
+    <div><div id="v1-legend"></div></div>
+    <div><div id="v1-bars"></div><div id="v1-detail"></div></div>
+  </div>
+  <p class="note">Un point = un utilisateur. Cliquer sur un objectif dans la légende le masque ou l'affiche. Une corrélation n'implique pas une causalité.</p>
+</div>
+
+<!-- ============ VUE 3 : Décideurs publics (heatmap) ============ -->
+<div class="view" id="view2" style="display:none">
+  <p class="question">Existe-t-il des différences d'adoption entre pays ?</p>
+  <p class="vars">Variables : pays, niveau d'éducation, type d'utilisateur · Technique : heatmap</p>
+  <div class="controls">
+    <label>Mesure : <select id="metric"><option value="n">Nombre de répondants</option><option value="h">Utilisation moyenne (h par jour)</option></select></label>
+    <label>Type d'utilisateur : <select id="utype"><option value="all">Tous</option><option>Étudiant</option><option>Professionnel</option></select></label>
+  </div>
+  <div class="layout"><div><div id="v2-legend"></div><div id="v2-chart"></div></div><div id="v2-detail"></div></div>
+  <p class="note">Attention : le nombre de répondants reflète la composition de l'échantillon, pas un taux d'adoption dans la population du pays. Les répondants sans pays ou sans niveau d'éducation sont exclus.</p>
+</div>
+
+
+<!-- ============ VUE 4 : Étudiants ============ -->
+<div class="view" id="view3" style="display:none">
+ <button id="reset-student-filters" type="button">
+  Réinitialiser les filtres
+ </button>
+
+  <p class="question">Comment les étudiants utilisent-ils l'IA dans leurs études ?</p>
+
+  <p class="vars">
+    Variables : outil utilisé, objectif d'utilisation, temps d'utilisation,
+    gain de temps, satisfaction et productivité · Technique : graphiques interactifs
+  </p>
+
+  <!-- Indicateurs principaux -->
+  <div class="student-kpis">
+    <div class="card" id="student-total">
+      Nombre d'étudiants
+    </div>
+    <div class="card" id="student-time">
+      Gain de temps moyen
+    </div>
+  </div>
+
+  <!-- Graphiques -->
+  <div class="student-grid">
+
+    <div class="card">
+      <h3>Quels outils utilisent les étudiants ?</h3>
+      <div id="student-tools"></div>
+    </div>
+
+    <div class="card">
+      <h3>Pourquoi utilisent-ils l'IA ?</h3>
+      <div id="student-objectives"></div>
+    </div>
+
+    <div class="card">
+      <h3>Utilisation quotidienne et gain de temps</h3>
+      <div id="student-scatter"></div>
+    </div>
+
+    <div class="card">
+      <h3>Détails sur un étudiant</h3>
+      <div id="student-detail">
+        Cliquez sur un point du graphique pour afficher les informations.
+      </div>
+    </div>
+
+    <div class="card">
+        <h3>Satisfaction et productivité selon le niveau d'études</h3>
+        <div id="student-education"></div>
+    </div>
+
+  </div>
+
+  <p class="note">
+    Les données présentées concernent uniquement les répondants ayant le type
+    d'utilisateur « Étudiant ». Le gain de temps est une valeur déclarée dans
+    le questionnaire.
+  </p>
+
+</div>
+
+
+<div id="tooltip"></div>
+<script src="js/d3.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
