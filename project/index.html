@@ -3,47 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Usage de l'IA : trois vues pour trois publics</title>
+<title>Usage de l'IA : tableau de bord</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h1>Usage de l'IA : trois vues pour trois publics</h1>
-<div id="tabs"></div>
+<header>
+  <h1>Usage de l'IA</h1>
+  <label>Type d'utilisateur<select id="f-type"></select></label>
+  <label>Niveau d'éducation<select id="f-edu"></select></label>
+  <label>Pays<select id="f-pays"></select></label>
+  <label>Outil d'IA<select id="f-outil"></select></label>
+  <label>Objectif d'usage<select id="f-objectif"></select></label>
+  <label class="chk"><input type="checkbox" id="f-cap"> Exclure &gt; 12 h/jour</label>
+  <button id="reset">Réinitialiser</button>
+  <span id="count"></span>
+</header>
+<main>
+  <section class="panel">
+    <div class="head"><h2>Quels outils sont les mieux évalués ?</h2><span class="sub">bulle = outil · taille = nombre d'utilisateurs · clic = filtrer</span></div>
+    <div class="chart" id="c0"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Usage et satisfaction sont-ils liés ?</h2><span class="sub">point = utilisateur · couleur = objectif</span></div>
+    <div class="chart" id="c1"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>L'usage diffère-t-il selon pays et éducation ?</h2>
+      <span class="sub">clic sur une case = filtrer · effectifs de l'échantillon, pas un taux d'adoption</span>
+      <span class="ctl"><select id="metric"><option value="n">Répondants</option><option value="h">Usage moyen (h/jour)</option></select>
+        <span id="lgmin">0</span><i class="grad"></i><span id="lgmax"></span></span></div>
+    <div class="chart" id="c2"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2 id="t3">Notes de satisfaction</h2><span class="sub" id="s3"></span></div>
+    <div class="chart" id="c3"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Satisfaction moyenne par objectif</h2><span class="sub">clic = filtrer</span></div>
+    <div class="chart" id="c4"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Outils utilisés dans la sélection</h2><span class="sub" id="s5">clic = filtrer</span></div>
+    <div class="chart" id="c5"></div>
+  </section>
+</main>
 <div id="message"></div>
-
-<!-- ============ VUE 1 : Développeurs IA (bubble chart) ============ -->
-<div class="view" id="view0">
-  <p class="question">Quels outils d'IA sont les mieux évalués ?</p>
-  <p class="vars">Variables : IA utilisée, précision perçue, niveau de satisfaction · Technique : bubble chart</p>
-  <div class="layout"><div id="v0-chart"></div><div id="v0-detail"></div></div>
-  <p class="note">Une bulle = un outil. Position : précision perçue (x) et satisfaction (y) moyennes ; taille : nombre d'utilisateurs ; couleur : outil. Les utilisateurs sans outil renseigné sont exclus. Attention : les axes sont zoomés sur l'intervalle des moyennes ; les écarts entre outils sont faibles (quelques dixièmes de point).</p>
-</div>
-
-<!-- ============ VUE 2 : Chercheurs (scatter plot) ============ -->
-<div class="view" id="view1" style="display:none">
-  <p class="question">Quels facteurs sont associés à la satisfaction ?</p>
-  <p class="vars">Variables : utilisation par jour, niveau de satisfaction, objectif d'utilisation · Technique : scatter plot</p>
-  <div class="controls"><label><input type="checkbox" id="cap"> Exclure les usages &gt; 12 h par jour (valeurs probablement aberrantes)</label></div>
-  <div class="layout">
-    <div><div id="v1-chart"></div><div id="v1-stat" class="note"></div></div>
-    <div><div id="v1-legend"></div></div>
-    <div><div id="v1-bars"></div><div id="v1-detail"></div></div>
-  </div>
-  <p class="note">Un point = un utilisateur. Cliquer sur un objectif dans la légende le masque ou l'affiche. Une corrélation n'implique pas une causalité.</p>
-</div>
-
-<!-- ============ VUE 3 : Décideurs publics (heatmap) ============ -->
-<div class="view" id="view2" style="display:none">
-  <p class="question">Existe-t-il des différences d'adoption entre pays ?</p>
-  <p class="vars">Variables : pays, niveau d'éducation, type d'utilisateur · Technique : heatmap</p>
-  <div class="controls">
-    <label>Mesure : <select id="metric"><option value="n">Nombre de répondants</option><option value="h">Utilisation moyenne (h par jour)</option></select></label>
-    <label>Type d'utilisateur : <select id="utype"><option value="all">Tous</option><option>Étudiant</option><option>Professionnel</option></select></label>
-  </div>
-  <div class="layout"><div><div id="v2-legend"></div><div id="v2-chart"></div></div><div id="v2-detail"></div></div>
-  <p class="note">Attention : le nombre de répondants reflète la composition de l'échantillon, pas un taux d'adoption dans la population du pays. Les répondants sans pays ou sans niveau d'éducation sont exclus.</p>
-</div>
-
 <div id="tooltip"></div>
 <script src="js/d3.min.js"></script>
 <script src="js/scripts.js"></script>
