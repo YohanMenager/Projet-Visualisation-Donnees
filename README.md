@@ -49,7 +49,7 @@ Importer le jeu de données initial au format CSV et conserver une copie intacte
 Analyser la structure du jeu de données, notamment ses 19 variables, les types de données, les valeurs distinctes et les valeurs manquantes, afin d'identifier d'éventuels problèmes de qualité.
 
 #### Step 3 — Traitement des valeurs manquantes
-Repérer les valeurs manquantes (`NaN`, `None`), les cellules vides et les entrées composées uniquement d'espaces, puis les remplacer par la mention « Non renseigné ».
+Repérer les valeurs manquantes (`NaN`, `None`), les cellules vides et les entrées composées uniquement d'espaces. Les catégories manquantes sont remplacées par « Non renseigné » ; les champs quantitatifs manquants sont imputés par la médiane de leur colonne.
 
 #### Step 4 — Nettoyage et normalisation des données
 Corriger les erreurs de saisie, supprimer les espaces superflus et harmoniser les valeurs, formats et unités de mesure dans l'ensemble des colonnes.
@@ -68,7 +68,13 @@ Exporter le jeu de données final nettoyé aux formats CSV et JSON, afin de perm
 
 >**Résultat final** : un jeu de données propre, cohérent et prêt pour la visualisation.
 
-> **À noter :** Le pipeline de préparation est documenté dans [`notebooks/data_cleaning.ipynb`] 
+Le nettoyage peut être exécuté depuis la racine du dépôt avec le script Python :
+
+```bash
+python scripts/data_cleaning.py
+```
+
+Le script lit `data/dataset_original.csv` et génère `data/dataset_clean.csv` et `data/dataset_clean.json`. Les chemins peuvent être personnalisés avec `--input` et `--output-dir`. Les symboles `$` et séparateurs de milliers des champs numériques sont retirés, sans conversion de devise. Les étapes sont également détaillées dans [`notebooks/data_cleaning.ipynb`](notebooks/data_cleaning.ipynb).
 
 ### Encodages visuels et techniques
 
@@ -95,7 +101,7 @@ Les bulles, le nuage de points, la carte thermique et l’histogramme composent 
 [data/dataset_original.csv](../data/dataset_original.csv) : données source.
 [data/dataset_clean.csv](../data/dataset_clean.csv) et [data/dataset_clean.json](../data/dataset_clean.json) : sorties du nettoyage.
 [notebooks/data_cleaning.ipynb](../notebooks/data_cleaning.ipynb) : fichier  d'inspection,  de préparation et d'export des données.
-[scripts/data_cleaning.py](../scripts/data_cleaning.py) : fichier contenant les scripts pythons.
+[scripts/data_cleaning.py](scripts/data_cleaning.py) : script exécutable de nettoyage et d'export des données.
 [web/index.html](../web/index.html), [web/js/main.js](../web/js/main.js) et [web/css/style.css](../web/css/style.css) : interface, visualisations et présentation du tableau de bord.
 [/requirements.txt]: fichier fournissant les dépendances Python.
 
