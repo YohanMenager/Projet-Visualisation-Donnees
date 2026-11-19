@@ -1,24 +1,55 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Projet Visualisation de Données</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Usage de l'IA : tableau de bord</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header>
-    <h1>Usage de l’IA : visualisations</h1>
-    <nav id="nav"></nav>
-    <div class="data">
-      <span id="status">Chargement…</span>
-      <label class="btn">Charger un autre dataset (CSV / JSON)
-        <input id="file" type="file" accept=".csv,.json" hidden>
-      </label>
-    </div>
-  </header>
-  <main id="stage"></main>
-  <script type="module" src="js/main.js"></script>
+<header>
+  <h1>Usage de l'IA</h1>
+  <label>Type d'utilisateur<select id="f-type"></select></label>
+  <label>Niveau d'éducation<select id="f-edu"></select></label>
+  <label>Pays<select id="f-pays"></select></label>
+  <label>Outil d'IA<select id="f-outil"></select></label>
+  <label>Objectif d'usage<select id="f-objectif"></select></label>
+  <label class="chk"><input type="checkbox" id="f-cap"> Exclure &gt; 12 h/jour</label>
+  <button id="reset">Réinitialiser</button>
+  <span id="count"></span>
+</header>
+<main>
+  <section class="panel">
+    <div class="head"><h2>Quels outils sont les mieux évalués ?</h2><span class="sub">bulle = outil · taille = nombre d'utilisateurs · clic = filtrer</span></div>
+    <div class="chart" id="c0"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Usage et satisfaction sont-ils liés ?</h2><span class="sub">point = utilisateur · couleur = objectif</span></div>
+    <div class="chart" id="c1"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>L'usage diffère-t-il selon pays et éducation ?</h2>
+      <span class="sub">clic sur une case = filtrer · effectifs de l'échantillon, pas un taux d'adoption</span>
+      <span class="ctl"><select id="metric"><option value="n">Répondants</option><option value="h">Usage moyen (h/jour)</option></select>
+        <span id="lgmin">0</span><i class="grad"></i><span id="lgmax"></span></span></div>
+    <div class="chart" id="c2"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2 id="t3">Notes de satisfaction</h2><span class="sub" id="s3"></span></div>
+    <div class="chart" id="c3"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Satisfaction moyenne par objectif</h2><span class="sub">clic = filtrer</span></div>
+    <div class="chart" id="c4"></div>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Outils utilisés dans la sélection</h2><span class="sub" id="s5">clic = filtrer</span></div>
+    <div class="chart" id="c5"></div>
+  </section>
+</main>
+<div id="message"></div>
+<div id="tooltip"></div>
+<script src="js/d3.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
