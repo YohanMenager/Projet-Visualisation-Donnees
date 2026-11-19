@@ -1,22 +1,375 @@
-html, body { height: 100%; margin: 0; overflow: hidden; }
-  body { display: grid; grid-template-rows: auto 1fr; background: #eef1f5; font-family: system-ui, sans-serif; color: #222; }
-  header { background: #fff; border-bottom: 1px solid #d5d9e0; padding: 6px 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
-  header h1 { font-size: 1rem; margin: 0 8px 0 0; }
-  header label { font-size: 0.78rem; display: flex; flex-direction: column; gap: 1px; color: #555; }
-  header select { font-size: 0.82rem; padding: 2px 4px; max-width: 150px; }
-  header .chk { flex-direction: row; align-items: center; gap: 4px; }
-  header button { font-size: 0.82rem; padding: 4px 10px; cursor: pointer; }
-  #count { margin-left: auto; font-size: 0.85rem; font-weight: 600; color: #1f4e79; }
-  main { display: grid; grid-template-columns: 1fr 1fr 1.1fr; grid-template-rows: 1.2fr 1fr; gap: 8px; padding: 8px; min-height: 0; }
-  .panel { background: #fff; border: 1px solid #d5d9e0; border-radius: 6px; display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: 6px 8px 4px; }
-  .head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-height: 32px; }
-  .head h2 { font-size: 0.86rem; margin: 0; }
-  .head .sub { font-size: 0.72rem; color: #666; }
-  .head .ctl { margin-left: auto; font-size: 0.72rem; display: flex; align-items: center; gap: 4px; }
-  .head select { font-size: 0.72rem; }
-  .chart { flex: 1; min-height: 0; position: relative; overflow: hidden; }
-  .grad { display: inline-block; width: 60px; height: 8px; background: linear-gradient(to right, #f7fbff, #08306b); }
-  svg { display: block; }
-  svg text { font-size: 10px; fill: #444; }
-  #tooltip { position: absolute; pointer-events: none; opacity: 0; background: #222; color: #fff; padding: 5px 8px; border-radius: 4px; font-size: 12px; line-height: 1.35; z-index: 5; }
-  #message .error { color: #b00020; margin: 12px; }
+
+/* =========================================
+   1. STYLE GENERAL
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #eef1f5;
+  font-family: system-ui, sans-serif;
+  color: #222;
+}
+
+/* =========================================
+   2. HEADER ET FILTRES
+========================================= */
+
+header {
+  background: #fff;
+  border-bottom: 1px solid #d5d9e0;
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+header h1 {
+  font-size: 1.2rem;
+  margin: 0 12px 0 0;
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+header label {
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #555;
+}
+
+header select {
+  font-size: 0.82rem;
+  padding: 5px;
+  max-width: 160px;
+  border: 1px solid #cbd1da;
+  border-radius: 4px;
+  background: #fff;
+}
+
+header .chk {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+header button {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: 1px solid #cbd1da;
+  border-radius: 4px;
+  background: #f7f8fa;
+}
+
+header button:hover {
+  background: #e8edf3;
+}
+
+#count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f4e79;
+}
+
+/* =========================================
+   3. NAVIGATION ENTRE LES VUES
+========================================= */
+
+.view-navigation {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 0;
+  background: #eef1f5;
+}
+
+.nav-btn {
+  padding: 9px 18px;
+  border: 1px solid #cbd1da;
+  border-radius: 6px 6px 0 0;
+  background: #e3e7ed;
+  color: #444;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  background: #fff;
+}
+
+.nav-btn.active {
+  background: #fff;
+  color: #1f4e79;
+  border-bottom-color: #fff;
+}
+
+/* =========================================
+   4. INDICATEURS KPI
+========================================= */
+
+.kpi-container {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 14px;
+  background: #eef1f5;
+}
+
+.kpi-card {
+  background: #fff;
+  border: 1px solid #d5d9e0;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.kpi-label {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.kpi-card strong {
+  font-size: 1.45rem;
+  color: #1f4e79;
+}
+
+/* =========================================
+   5. VUES DU DASHBOARD
+========================================= */
+
+.view {
+  display: none;
+  flex: 1;
+  min-height: 0;
+}
+
+.view.active {
+  display: block;
+}
+
+/* =========================================
+   6. GRILLE DES GRAPHIQUES
+========================================= */
+
+main {
+  padding: 10px 14px 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 320px;
+  gap: 12px;
+}
+
+/* En vue globale, les graphiques détaillés sont cachés */
+
+/* Graphiques et panneau masqués en vue globale 
+.detail-only {
+  display: none;
+}
+
+*/
+/* Graphiques et panneau affichés en vue détaillée 
+#view-overview.detail-mode .detail-only {
+  display: flex;
+}
+*/
+/* Vue globale : masquer les éléments de détail */
+#view-overview:not(.detail-mode) .detail-only {
+  display: none !important;
+}
+
+/* Vue détaillée : afficher les éléments de détail */
+#view-overview.detail-mode .detail-only {
+  display: flex !important;
+}
+
+/* =========================================
+   7. PANNEAUX ET GRAPHIQUES
+========================================= */
+
+.panel {
+  background: #fff;
+  border: 1px solid #d5d9e0;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 34px;
+}
+
+.head h2 {
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.head .sub {
+  font-size: 0.72rem;
+  color: #666;
+}
+
+.head .ctl {
+  margin-left: auto;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.head select {
+  font-size: 0.75rem;
+}
+
+.chart {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.grad {
+  display: inline-block;
+  width: 60px;
+  height: 8px;
+  background: linear-gradient(to right, #f7fbff, #08306b);
+}
+
+svg {
+  display: block;
+}
+
+svg text {
+  font-size: 10px;
+  fill: #444;
+}
+
+/* =========================================
+   8. PANNEAU DE DETAILS
+========================================= */
+
+.detail-panel {
+  margin-top: 12px;
+  min-height: 160px;
+}
+
+#detail-content {
+  padding: 8px 2px;
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+#detail-content p {
+  margin: 4px 0;
+}
+
+#detail-title {
+  color: #1f4e79;
+}
+
+/* =========================================
+   9. INFOBULLES ET MESSAGES
+========================================= */
+
+#tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  background: #222;
+  color: #fff;
+  padding: 6px 9px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  z-index: 10;
+}
+
+#message .error {
+  color: #b00020;
+  margin: 12px;
+}
+
+/* =========================================
+   10. ADAPTATION AUX ECRANS PLUS PETITS
+========================================= */
+
+@media (max-width: 900px) {
+  .kpi-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 300px;
+  }
+
+  header h1 {
+    width: 100%;
+  }
+
+  #count {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .kpi-container {
+    grid-template-columns: 1fr 1fr;
+    padding: 8px;
+  }
+
+  .kpi-card {
+    padding: 9px;
+  }
+
+  .kpi-card strong {
+    font-size: 1.2rem;
+  }
+
+  main {
+    padding: 8px;
+  }
+
+  .view-navigation {
+    padding-left: 8px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 9px 6px;
+    font-size: 0.8rem;
+  }
+}

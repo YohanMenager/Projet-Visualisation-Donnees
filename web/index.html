@@ -1,55 +1,181 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Usage de l'IA : tableau de bord</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usage de l'IA : tableau de bord</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-<header>
-  <h1>Usage de l'IA</h1>
-  <label>Type d'utilisateur<select id="f-type"></select></label>
-  <label>Niveau d'éducation<select id="f-edu"></select></label>
-  <label>Pays<select id="f-pays"></select></label>
-  <label>Outil d'IA<select id="f-outil"></select></label>
-  <label>Objectif d'usage<select id="f-objectif"></select></label>
-  <label class="chk"><input type="checkbox" id="f-cap"> Exclure &gt; 12 h/jour</label>
-  <button id="reset">Réinitialiser</button>
-  <span id="count"></span>
-</header>
-<main>
-  <section class="panel">
-    <div class="head"><h2>Quels outils sont les mieux évalués ?</h2><span class="sub">bulle = outil · taille = nombre d'utilisateurs · clic = filtrer</span></div>
-    <div class="chart" id="c0"></div>
+
+  <header>
+    <h1>Usage de l'IA</h1>
+
+    <div class="filters">
+      <label>
+        Type d'utilisateur
+        <select id="f-type"></select>
+      </label>
+
+      <label>
+        Niveau d'éducation
+        <select id="f-edu"></select>
+      </label>
+
+      <label>
+        Pays
+        <select id="f-pays"></select>
+      </label>
+
+      <label>
+        Outil d'IA
+        <select id="f-outil"></select>
+      </label>
+
+      <label>
+        Objectif d'usage
+        <select id="f-objectif"></select>
+      </label>
+
+      <label class="chk">
+        <input type="checkbox" id="f-cap">
+        Exclure > 12 h/jour
+      </label>
+
+      <button id="reset">Réinitialiser</button>
+      <span id="count"></span>
+    </div>
+  </header>
+
+  <!-- Navigation entre les deux vues -->
+  <nav class="view-navigation">
+    <button id="btn-overview" class="nav-btn active" type="button">
+      Vue globale
+    </button>
+
+    <button id="btn-detail" class="nav-btn" type="button">
+      Exploration détaillée
+    </button>
+  </nav>
+
+  <!-- Indicateurs principaux -->
+  <section class="kpi-container" id="kpi-container">
+    <article class="kpi-card">
+      <span class="kpi-label">Utilisateurs sélectionnés</span>
+      <strong id="kpi-total">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Utilisation quotidienne moyenne</span>
+      <strong id="kpi-hours">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Gain de temps moyen par semaine</span>
+      <strong id="kpi-gain">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Satisfaction moyenne</span>
+      <strong id="kpi-satisfaction">—</strong>
+    </article>
   </section>
-  <section class="panel">
-    <div class="head"><h2>Usage et satisfaction sont-ils liés ?</h2><span class="sub">point = utilisateur · couleur = objectif</span></div>
-    <div class="chart" id="c1"></div>
-  </section>
-  <section class="panel">
-    <div class="head"><h2>L'usage diffère-t-il selon pays et éducation ?</h2>
-      <span class="sub">clic sur une case = filtrer · effectifs de l'échantillon, pas un taux d'adoption</span>
-      <span class="ctl"><select id="metric"><option value="n">Répondants</option><option value="h">Usage moyen (h/jour)</option></select>
-        <span id="lgmin">0</span><i class="grad"></i><span id="lgmax"></span></span></div>
-    <div class="chart" id="c2"></div>
-  </section>
-  <section class="panel">
-    <div class="head"><h2 id="t3">Notes de satisfaction</h2><span class="sub" id="s3"></span></div>
-    <div class="chart" id="c3"></div>
-  </section>
-  <section class="panel">
-    <div class="head"><h2>Satisfaction moyenne par objectif</h2><span class="sub">clic = filtrer</span></div>
-    <div class="chart" id="c4"></div>
-  </section>
-  <section class="panel">
-    <div class="head"><h2>Outils utilisés dans la sélection</h2><span class="sub" id="s5">clic = filtrer</span></div>
-    <div class="chart" id="c5"></div>
-  </section>
-</main>
-<div id="message"></div>
-<div id="tooltip"></div>
-<script src="js/d3.js"></script>
-<script src="js/main.js"></script>
+
+  <!-- Vue globale -->
+  <main id="view-overview" class="view active">
+
+    <div class="dashboard-grid">
+
+      <section class="panel">
+        <div class="head">
+          <h2>Quels outils sont les mieux évalués ?</h2>
+          <span class="sub">
+            Bulle = outil · taille = nombre d'utilisateurs · clic = filtrer
+          </span>
+        </div>
+        <div class="chart" id="c0"></div>
+      </section>
+
+      <section class="panel">
+        <div class="head">
+          <h2>Utilisation quotidienne et gain de temps</h2>
+          <span class="sub">
+            Point = utilisateur · clic = afficher les détails
+          </span>
+        </div>
+        <div class="chart" id="c1"></div>
+      </section>
+
+      <section class="panel">
+        <div class="head">
+          <h2>Comment l'usage varie-t-il selon le profil ?</h2>
+          <span class="sub">
+            Pays et niveau d'éducation
+          </span>
+
+          <span class="ctl">
+            <select id="metric">
+              <option value="n">Répondants</option>
+              <option value="h">Usage moyen (h/jour)</option>
+            </select>
+            <span id="lgmin">0</span>
+            <i class="grad"></i>
+            <span id="lgmax"></span>
+          </span>
+        </div>
+        <div class="chart" id="c2"></div>
+      </section>
+
+      <section class="panel">
+        <div class="head">
+          <h2 id="t3">Répartition des notes de satisfaction</h2>
+          <span class="sub" id="s3"></span>
+        </div>
+        <div class="chart" id="c3"></div>
+      </section>
+
+      <!-- Ces graphiques seront affichés dans la vue détaillée -->
+      <section class="panel detail-only">
+        <div class="head">
+          <h2>Satisfaction moyenne par objectif</h2>
+          <span class="sub">Clic = filtrer par objectif</span>
+        </div>
+        <div class="chart" id="c4"></div>
+      </section>
+
+      <section class="panel detail-only">
+        <div class="head">
+          <h2>Outils utilisés dans la sélection</h2>
+          <span class="sub" id="s5">Clic = filtrer par outil</span>
+        </div>
+        <div class="chart" id="c5"></div>
+      </section>
+
+    </div>
+
+    <!-- Panneau de détails, visible dans la vue détaillée -->
+    <section class="panel detail-only detail-panel">
+      <div class="head">
+        <h2 id="detail-title">Détails de la sélection</h2>
+      </div>
+      <div id="detail-content">
+        <p>
+          Sélectionnez un outil, un objectif ou un élément d'un graphique
+          pour afficher ici les informations correspondantes.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Messages et infobulles -->
+  <div id="message"></div>
+  <div id="tooltip"></div>
+
+  <script src="js/d3.js"></script>
+  <script src="js/main.js"></script>
+
 </body>
 </html>
