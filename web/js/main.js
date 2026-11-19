@@ -311,7 +311,8 @@ function drawBubble() {
     .attr("stroke", d => d.outil === F.outil ? "#000" : "#fff").attr("stroke-width", d => d.outil === F.outil ? 2.5 : 1)
     .on("mousemove", (e, d) => showTip(e, `<b>${d.outil}</b><br>${d.n} utilisateurs<br>Précision : ${f1(d.prec)} / 5<br>Satisfaction : ${f1(d.sat)} / 10`))
     .on("mouseout", hideTip)
-    .on("click", (e, d) => {showToolDetail(d.outil); toggle("outil", d.outil);});
+    .on("click", (e, d) => {toggle("outil", d.outil);showToolDetail(d.outil);
+});
 // Étiquettes au-dessus des bulles, avec un halo blanc pour rester lisibles
   const right = d => x(d.prec) > iw * 0.7;
   g.selectAll("text.lab").data(tools).join("text").attr("class", "lab").style("pointer-events", "none")
@@ -436,7 +437,7 @@ function drawScatter() {
       .attr("stroke-dasharray", "5 4");
 
     const r = sxy / Math.sqrt(sxx * syy);
-    label = `r = ${r.toFixed(2)} · n = ${n}`;
+    label = ` Pearson r = ${r.toFixed(2)} · n = ${n}`;
   }
 
   g.append("text")
@@ -513,7 +514,7 @@ function drawObjBars() {
     .filter(d => d.n > 0).sort((a, b) => b.mean - a.mean)
     .map(d => ({ key: d.o, label: `${d.o} (${d.n})`, value: d.mean, text: f1(d.mean), color: colorObj(d.o), faded: F.objectif && F.objectif !== d.o,
                  tip: `<b>${d.o}</b><br>${d.n} utilisateurs<br>Satisfaction moyenne : ${f1(d.mean)}` }));
-  hbar("#c4", items, {onClick: k => {showObjectiveDetail(k); toggle("objectif", k);},domain: [0, 10]});
+  hbar("#c4", items, {onClick: k => {toggle("objectif", k); showObjectiveDetail(k);},domain: [0, 10]});
 }
 
 function drawToolBars() {
@@ -524,7 +525,7 @@ function drawToolBars() {
     : "clic = filtrer");
   const items = d3.rollups(rows.filter(d => d.outil !== NR), g => g.length, d => d.outil).sort((a, b) => b[1] - a[1]).slice(0, 8)
     .map(([t, n]) => ({ key: t, label: t, value: n, text: n, color: colorTool(t), faded: F.outil && F.outil !== t, tip: `<b>${t}</b><br>${n} utilisateurs` }));
-  hbar("#c5", items, {onClick: k => {showToolDetail(k); toggle("outil", k);}});
+  hbar("#c5", items, {onClick: k => {toggle("outil", k); showToolDetail(k);}});
 }
 
 console.log("Bouton global :", document.querySelector("#btn-overview"));
