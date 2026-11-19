@@ -525,13 +525,8 @@ function drawToolBars() {
     : "clic = filtrer");
   const items = d3.rollups(rows.filter(d => d.outil !== NR), g => g.length, d => d.outil).sort((a, b) => b[1] - a[1]).slice(0, 8)
     .map(([t, n]) => ({ key: t, label: t, value: n, text: n, color: colorTool(t), faded: F.outil && F.outil !== t, tip: `<b>${t}</b><br>${n} utilisateurs` }));
-<<<<<<< HEAD
-  hbar("#c5", items, { onClick: k => toggle("outil", k) });
-}
-=======
   hbar("#c5", items, {onClick: k => {toggle("outil", k); showToolDetail(k);}});
 }
 
 console.log("Bouton global :", document.querySelector("#btn-overview"));
 console.log("Bouton détail :", document.querySelector("#btn-detail"));
->>>>>>> main
