@@ -2,9 +2,15 @@
 
 ## Description
 
-Ce projet a pour objectif de réaliser une analyse exploratoire et une visualisation de données à l'aide de Python.
+Ce projet a pour objectif de réaliser une analyse exploratoire et une visualisation de données à l'aide de Python. Il porte sur le thème "Utilisation et impact de l'IA sur les étudiants et les proffessionnels".
+
+
+## Soucres de données 
+les données  brutes utilisées sont dans le fichier data_original.csv et sont téléchargées via le lien suivant : https://www.kaggle.com/datasets/eishatuzzuhra/ai-usage-and-impact-on-students-and-professionals
+
 
 ## Technologies utilisées
+Pour la réalisation de ce projet nous avons utilisé les technologies suivantes : 
 
 - Python 3.12
 - Jupyter Notebook
@@ -12,6 +18,7 @@ Ce projet a pour objectif de réaliser une analyse exploratoire et une visualisa
 - Pandas
 - Matplotlib
 - Seaborn
+
 
 ## Installation
 

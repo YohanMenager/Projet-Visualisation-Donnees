@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usage de l'IA : tableau de bord</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <header>
+    <h1>Usage de l'IA</h1>
+
+    <div class="filters">
+      <label>
+        Type d'utilisateur
+        <select id="f-type"></select>
+      </label>
+
+      <label>
+        Niveau d'éducation
+        <select id="f-edu"></select>
+      </label>
+
+      <label>
+        Pays
+        <select id="f-pays"></select>
+      </label>
+
+      <label>
+        Outil d'IA
+        <select id="f-outil"></select>
+      </label>
+
+      <label>
+        Objectif d'usage
+        <select id="f-objectif"></select>
+      </label>
+
+      <label class="chk">
+        <input type="checkbox" id="f-cap">
+        Exclure > 12 h/jour
+      </label>
+
+      <button id="reset">Réinitialiser</button>
+      <span id="count"></span>
+    </div>
+  </header>
+
+  <!-- Navigation entre les deux vues -->
+  <nav class="view-navigation">
+    <button id="btn-overview" class="nav-btn active" type="button">
+      Vue globale
+    </button>
+
+    <button id="btn-detail" class="nav-btn" type="button">
+      Exploration détaillée
+    </button>
+  </nav>
+
+  <!-- Indicateurs principaux -->
+  <section class="kpi-container" id="kpi-container">
+    <article class="kpi-card">
+      <span class="kpi-label">Utilisateurs sélectionnés</span>
+      <strong id="kpi-total">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Utilisation quotidienne moyenne</span>
+      <strong id="kpi-hours">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Gain de temps moyen par semaine</span>
+      <strong id="kpi-gain">—</strong>
+    </article>
+
+    <article class="kpi-card">
+      <span class="kpi-label">Satisfaction moyenne</span>
+      <strong id="kpi-satisfaction">—</strong>
+    </article>
+  </section>
+
+  <!-- Vue globale -->
+  
+<!-- Conteneur des deux vues -->
+<main id="view-overview" class="view active">
+
+  <!-- ========================= -->
+  <!-- VUE GLOBALE                -->
+  <!-- ========================= -->
+  <section class="overview-only">
+
+    <div class="dashboard-grid">
+
+      <!-- Outils les plus utilisés -->
+      <section class="panel">
+        <div class="head">
+          <h2>Quels outils d'IA sont les plus utilisés ?</h2>
+          <span class="sub">
+            Nombre d'utilisateurs par outil
+          </span>
+        </div>
+        <div class="chart" id="c6"></div>
+      </section>
+
+      <!-- Objectifs d'utilisation -->
+      <section class="panel">
+        <div class="head">
+          <h2>Pour quels objectifs l'IA est-elle utilisée ?</h2>
+          <span class="sub">
+            Répartition des objectifs d'utilisation
+          </span>
+        </div>
+        <div class="chart" id="c7"></div>
+      </section>
+
+      <!-- Satisfaction globale -->
+      <section class="panel">
+        <div class="head">
+          <h2 id="t3">Quel est le niveau de satisfaction général ?</h2>
+          <span class="sub" id="s3">
+            Distribution des notes de satisfaction
+          </span>
+        </div>
+        <div class="chart" id="c3"></div>
+      </section>
+
+      <!-- Comparaison étudiants / professionnels -->
+      <section class="panel">
+        <div class="head">
+          <h2>Étudiants et professionnels : quelles différences ?</h2>
+          <span class="sub">
+            Comparaison de l'utilisation quotidienne et de la satisfaction
+          </span>
+        </div>
+        <div class="chart" id="c8"></div>
+      </section>
+
+    </div>
+  </section>
+
+
+  <!-- ========================= -->
+  <!-- EXPLORATION DÉTAILLÉE      -->
+  <!-- ========================= -->
+  <section class="detail-only">
+
+    <div class="dashboard-grid">
+
+      <!-- Précision et satisfaction par outil -->
+      <section class="panel">
+        <div class="head">
+          <h2>Quels outils sont les mieux évalués ?</h2>
+          <span class="sub">
+            Bulle = outil · taille = nombre d'utilisateurs · clic = filtrer
+          </span>
+        </div>
+        <div class="chart" id="c0"></div>
+      </section>
+
+      <!-- Utilisation et gain de temps -->
+      <section class="panel">
+        <div class="head">
+          <h2>Utilisation quotidienne et gain de temps</h2>
+          <span class="sub">
+            Chaque point représente un utilisateur · clic = afficher les détails
+          </span>
+        </div>
+        <div class="chart" id="c1"></div>
+      </section>
+
+      <!-- Pays et éducation -->
+      <section class="panel">
+        <div class="head">
+          <h2>Comment l'usage varie-t-il selon le profil ?</h2>
+          <span class="sub">
+            Comparaison par pays et niveau d'éducation
+          </span>
+
+          <span class="ctl">
+            <select id="metric">
+              <option value="n">Nombre de répondants</option>
+              <option value="h">Usage moyen (h/jour)</option>
+            </select>
+            <span id="lgmin">0</span>
+            <i class="grad"></i>
+            <span id="lgmax"></span>
+          </span>
+        </div>
+        <div class="chart" id="c2"></div>
+      </section>
+
+      <!-- Satisfaction par objectif -->
+      <section class="panel">
+        <div class="head">
+          <h2>Quels objectifs obtiennent la meilleure satisfaction ?</h2>
+          <span class="sub">
+            Satisfaction moyenne par objectif · clic = filtrer
+          </span>
+        </div>
+        <div class="chart" id="c4"></div>
+      </section>
+
+      <!-- Outils dans la sélection -->
+      <section class="panel">
+        <div class="head">
+          <h2>Quels outils sont utilisés dans la sélection ?</h2>
+          <span class="sub" id="s5">
+            Nombre d'utilisateurs · clic = filtrer par outil
+          </span>
+        </div>
+        <div class="chart" id="c5"></div>
+      </section>
+
+    </div>
+
+    <!-- Panneau de détails interactif -->
+    <section class="panel detail-panel">
+      <div class="head">
+        <h2 id="detail-title">Détails de la sélection</h2>
+      </div>
+
+      <div id="detail-content">
+        <p>
+          Sélectionnez un outil, un objectif ou un élément d'un graphique
+          pour afficher ici les informations correspondantes.
+        </p>
+      </div>
+    </section>
+
+  </section>
+
+</main>
+
+
+  <!-- Messages et infobulles -->
+  <div id="message"></div>
+  <div id="tooltip"></div>
+
+  <script src="js/d3.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
