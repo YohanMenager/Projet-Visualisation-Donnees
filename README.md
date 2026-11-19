@@ -9,15 +9,14 @@ informations présentes sur le site ou les données ont été récupérées. Il 
 
 ## Utilisateurs visés et besoins
 
-### Utilisateur 1   : Etablissement universitaire (Etudiants et enseignants )
+### Utilisateur 1   : Etablissement universitaire et écoles (Etudiants et enseignants )
 #### Problématique : Comment les étudiants utilisent-ils l'IA dans leurs études et quel impact perçoivent-ils sur leur travail ?
 #### Tâches : 
    - Identifier les outils d'IA les plus utilisés par les étudiants.
-   - Comparer l'utilisation selon le niveau d'études.
-   - Identifier les principales tâches réalisées avec l'IA.
-   - Comparer le temps d'utilisation et le temps gagné.
-   - Explorer la satisfaction et la productivité perçue des étudiants.
-
+   - Comparer les pratiques d'utilisation de l'IA selon le niveau d'études et le pays.
+   - Identifier les objectifs pour lesquels les étudiants utilisent principalement l'IA et comparer leur niveau de satisfaction selon ces objectifs.
+   - Explorer la relation entre le temps consacré à l'utilisation de l'IA et le gain de temps déclaré par les étudiants.
+   - Évaluer la satisfaction des étudiants et comparer la précision perçue des différents outils d'IA.
 ### Utilisateurs 2 : Entreprise et RH (Professionnels et managers)
 #### Problématique : Comment les professionnels intègrent-ils l'IA dans leur travail et quels bénéfices perçoivent-ils ?
 #### Tâches 
@@ -64,29 +63,32 @@ Traduire les valeurs catégorielles en français et renommer les colonnes du jeu
 Détecter les enregistrements en doublon, identifier les valeurs aberrantes potentielles, vérifier que les valeurs se situent dans des plages acceptables, et contrôler la cohérence globale ainsi que la fiabilité du jeu de données nettoyé.
 
 #### Step 8 — Exportation du jeu de données nettoyé
-Exporter le jeu de données final nettoyé aux formats CSV et JSON, afin de permettre la création des visualisations interactives via D3.js.
+Exporter le jeu de données final nettoyé aux formats CSV, afin de permettre la création des visualisations interactives via D3.js.
 
 >**Résultat final** : un jeu de données propre, cohérent et prêt pour la visualisation.
 
 > **À noter :** Le pipeline de préparation est documenté dans [`notebooks/data_cleaning.ipynb`] 
 
-### Encodages visuels et techniques
+### ### Encodages visuels et techniques
 
-L’application lit le CSV nettoyé avec D3.js. Elle met en correspondance les colonnes avec les champs utilisés par les graphiques, calcule les effectifs et les moyennes nécessaires, puis redessine les vues selon les filtres. Les menus filtrent le type d’utilisateur, le niveau d’études, le pays, l’outil et l’objectif ; une option permet d’exclure les usages supérieurs à 12 heures par jour. Les clics sur certains éléments appliquent également un filtre ou ouvrent un panneau de détails. Les quatre indicateurs affichent le nombre de répondants sélectionnés, l’usage quotidien moyen, le gain de temps moyen et la satisfaction moyenne.
+L’application charge le fichier CSV nettoyé à l’aide de D3.js. Elle associe les colonnes du jeu de données aux variables utilisées dans les visualisations, puis effectue les calculs nécessaires, notamment les effectifs et les moyennes. Les graphiques sont actualisés automatiquement en fonction des filtres appliqués par l’utilisateur.
 
-Les variables quantitatives sont principalement encodées par la **position** sur un axe, plus facile à comparer précisément ; les catégories sont distinguées par la **couleur** ou placées sur des axes catégoriels. Les couleurs des outils et des objectifs sont attribuées par une palette catégorielle D3 (*Tableau 10*) : une couleur identifie une catégorie, elle ne représente pas une valeur « meilleure ». Les valeurs manquantes sont grisées. La carte thermique emploie une échelle séquentielle de bleus : plus le bleu est foncé, plus la valeur affichée est élevée. Les sélections actives sont mises en évidence et les éléments hors sélection sont atténués.
+Les menus permettent de filtrer les données selon le type d’utilisateur, le niveau d’études, le pays, l’outil d’IA et l’objectif d’utilisation. Une option permet également d’exclure les répondants déclarant plus de 12 heures d’utilisation par jour. Certains éléments des graphiques sont interactifs : un clic peut appliquer un filtre ou ouvrir un panneau présentant des informations détaillées. Les quatre indicateurs principaux affichent le nombre de répondants sélectionnés, la durée moyenne d’utilisation quotidienne, le gain de temps moyen déclaré et le niveau moyen de satisfaction.
+
+Les variables quantitatives sont principalement encodées par la **position sur un axe**, ce qui facilite leur comparaison. Les variables catégorielles sont représentées sur des axes catégoriels ou différenciées par la **couleur**. Les couleurs des outils et des objectifs sont attribuées à l’aide de palettes catégorielles D3 (*Tableau 10*) : chaque catégorie possède une couleur distincte, sans que celle-ci exprime une valeur plus ou moins élevée. Les valeurs manquantes sont représentées en gris lorsqu’elles sont présentes dans les visualisations. La carte thermique utilise une échelle séquentielle de bleus : plus la teinte est foncée, plus la valeur représentée est élevée. Enfin, les éléments sélectionnés sont mis en évidence, tandis que les éléments qui ne correspondent pas à la sélection sont atténués.
 
 | Vue | Mapping des données vers les variables visuelles | À quoi sert la technique |
 |---|---|---|
-| **Bulles — évaluation des outils** | Chaque bulle représente un outil. **x** = précision perçue moyenne (sur 5) ; **y** = satisfaction moyenne (sur 10) ; **aire** de la bulle = nombre d’utilisateurs ; **couleur** = outil. | Comparer simultanément popularité, précision perçue et satisfaction. Le nuage de points positionne les catégories selon deux mesures quantitatives ; la taille ajoute une troisième mesure. |
-| **Nuage de points — usage et gain de temps** | Chaque point représente un répondant. **x** = heures d’usage par jour ; **y** = heures gagnées par semaine ; **couleur** = objectif d’usage. Une droite de tendance et le coefficient *r* résument la corrélation des répondants sélectionnés. | Explorer une association entre deux mesures, repérer dispersion, groupes et valeurs atypiques. Une corrélation n’implique pas une causalité. |
-| **Carte thermique — pays et études** | **Colonnes** = niveau d’études ; **lignes** = pays ; **intensité du bleu** = effectif ou usage moyen (heures/jour), au choix ; **texte dans la cellule** = valeur ; gris = absence de valeur. | Repérer rapidement les cellules avec les effectifs ou les moyennes les plus élevés et comparer les profils pays–études. |
-| **Histogramme — satisfaction** | **x** = note de satisfaction arrondie ; **hauteur** = nombre de répondants ; couleur = outil sélectionné, ou bleu par défaut. | Montrer la distribution des notes, leur concentration et leur étalement, plutôt que seulement une moyenne. |
-| **Barres horizontales — satisfaction par objectif** *(détail)* | **y** = objectif, trié par satisfaction moyenne décroissante ; **longueur** = satisfaction moyenne sur 10 ; étiquette = effectif et moyenne ; **couleur** = objectif. | Comparer et classer des moyennes entre catégories, tout en rappelant le nombre d’observations associé. |
-| **Barres horizontales — outils utilisés** *(détail)* | **y** = outil ; **longueur** = nombre de répondants ; **couleur** = outil ; étiquette = effectif. La vue affiche au plus les huit outils les plus présents dans la sélection. | Comparer les fréquences d’usage et sélectionner un outil pour filtrer les autres vues. |
+| **Bulles — évaluation des outils** | Chaque bulle représente un outil. **X** = précision perçue moyenne (sur 5) ; **Y** = satisfaction moyenne (sur 10) ; **aire de la bulle** = nombre d’utilisateurs ; **couleur** = outil. | Comparer simultanément la popularité des outils, leur précision perçue et la satisfaction des utilisateurs. La position représente deux mesures quantitatives, tandis que la taille ajoute une troisième dimension. |
+| **Nuage de points — usage et gain de temps** | Chaque point représente un répondant. **X** = heures d’utilisation par jour ; **Y** = gain de temps hebdomadaire déclaré ; **couleur** = objectif d’utilisation de l’IA. Une droite de tendance et le coefficient de corrélation *r* résument la relation entre les deux variables pour les répondants sélectionnés. | Explorer une éventuelle association entre deux mesures quantitatives, observer leur dispersion et repérer des groupes ou des valeurs atypiques. Une corrélation ne signifie pas nécessairement qu’il existe un lien de causalité. |
+| **Carte thermique — pays et niveaux d’études** | **Colonnes** = niveaux d’études ; **lignes** = pays ; **intensité du bleu** = effectif ou moyenne des heures d’utilisation quotidienne, selon la mesure sélectionnée ; **texte dans chaque cellule** = valeur correspondante ; gris = absence de valeur. | Repérer rapidement les cellules présentant les effectifs ou les moyennes les plus élevés et comparer les profils selon le pays et le niveau d’études. |
+| **Histogramme — satisfaction** | **X** = notes de satisfaction arrondies ; **hauteur des barres** = nombre de répondants correspondant à chaque note. | Visualiser la distribution des niveaux de satisfaction, leur concentration et leur dispersion, plutôt que de se limiter à une moyenne générale. |
+| **Barres horizontales — satisfaction par objectif** *(exploration détaillée)* | **Y** = objectifs d’utilisation, classés par satisfaction moyenne décroissante ; **longueur des barres** = satisfaction moyenne sur 10 ; **étiquettes** = effectif et moyenne ; **couleur** = objectif. | Comparer les niveaux moyens de satisfaction selon les objectifs d’utilisation et observer les effectifs associés à chaque catégorie. |
+| **Barres horizontales — outils utilisés** *(exploration détaillée)* | **Y** = outils d’IA ; **longueur des barres** = nombre de répondants utilisant chaque outil ; **couleur** = outil ; **étiquette** = effectif. Le graphique affiche au maximum les huit outils les plus représentés dans la sélection actuelle. | Comparer la fréquence d’utilisation des différents outils et permettre à l’utilisateur de sélectionner un outil afin de filtrer les autres visualisations. |
 
-Les bulles, le nuage de points, la carte thermique et l’histogramme composent la **vue globale**. Les deux graphiques en barres apparaissent dans **Exploration détaillée**, avec un panneau qui présente les informations du répondant, de l’outil ou de l’objectif sélectionné. Les visualisations sont celles présentes dans l’application ; le dépôt n’indique pas quel membre de l’équipe est responsable de chacune.
+Les quatre premiers graphiques composent la **vue globale**, qui permet d'obtenir une première lecture des données. Les deux graphiques en barres sont accessibles dans la partie **Exploration détaillée**, accompagnés d'un panneau affichant des informations complémentaires sur le répondant, l'outil ou l'objectif sélectionné. L'ensemble des visualisations partage les mêmes filtres afin de garantir la cohérence de l'exploration entre les différentes vues.
 
+Les visualisations décrites correspondent aux graphiques présents dans l’application. Le dépôt ne précise pas la répartition des responsabilités entre les membres de l’équipe pour leur réalisation.
 
 ### Présentation du pipeline sous forme de workflow 
 ![alt text](image.png)
