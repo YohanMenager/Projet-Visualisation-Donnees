@@ -7,18 +7,22 @@
   box-sizing: border-box;
 }
 
-html, body {
-  min-height: 100%;
+html,
+body {
+  width: 100%;
+  height: 100%;
   margin: 0;
 }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #eef1f5;
+  overflow: hidden;
+  background: #f3f6fa;
   font-family: system-ui, sans-serif;
-  color: #222;
+  color: #243247;
 }
 
 /* =========================================
@@ -26,69 +30,82 @@ body {
 ========================================= */
 
 header {
-  background: #fff;
-  border-bottom: 1px solid #d5d9e0;
-  padding: 10px 14px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 16px;
-}
-
-header h1 {
-  font-size: 1.2rem;
-  margin: 0 12px 0 0;
-  white-space: nowrap;
-}
-
-.filters {
+  background: #ffffff;
+  border-bottom: 1px solid #dce3ec;
+  padding: 7px 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
 }
 
+header h1 {
+  font-size: 1.1rem;
+  margin: 0 8px 0 0;
+  white-space: nowrap;
+  color: #183153;
+}
+
+.filters {
+  display: flex;
+  flex: 1;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 header label {
-  font-size: 0.78rem;
+  font-size: 0.70rem;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  color: #555;
+  gap: 2px;
+  color: #526176;
 }
 
 header select {
-  font-size: 0.82rem;
-  padding: 5px;
-  max-width: 160px;
-  border: 1px solid #cbd1da;
-  border-radius: 4px;
-  background: #fff;
+  width: 120px;
+  max-width: 120px;
+  font-size: 0.76rem;
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #243247;
 }
 
 header .chk {
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  white-space: nowrap;
+  font-size: 0.70rem;
 }
 
 header button {
-  font-size: 0.82rem;
-  padding: 6px 12px;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  padding: 5px 9px;
   cursor: pointer;
-  border: 1px solid #cbd1da;
-  border-radius: 4px;
-  background: #f7f8fa;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #edf3f8;
+  color: #24476b;
+  transition: background 0.2s ease;
 }
 
 header button:hover {
-  background: #e8edf3;
+  background: #dceaf4;
 }
 
 #count {
   margin-left: auto;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1f4e79;
+  min-width: 115px;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #167b83;
 }
 
 /* =========================================
@@ -97,30 +114,32 @@ header button:hover {
 
 .view-navigation {
   display: flex;
-  gap: 8px;
-  padding: 10px 14px 0;
-  background: #eef1f5;
+  gap: 6px;
+  padding: 6px 12px 0;
+  background: #f3f6fa;
 }
 
 .nav-btn {
-  padding: 9px 18px;
-  border: 1px solid #cbd1da;
+  padding: 7px 14px;
+  border: 1px solid #d3dce7;
   border-radius: 6px 6px 0 0;
-  background: #e3e7ed;
-  color: #444;
-  font-size: 0.9rem;
+  background: #e7edf4;
+  color: #526176;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+
 .nav-btn:hover {
-  background: #fff;
+  background: #ffffff;
 }
 
 .nav-btn.active {
-  background: #fff;
-  color: #1f4e79;
-  border-bottom-color: #fff;
+  background: #ffffff;
+  color: #176b78;
+  border-bottom-color: #ffffff;
 }
 
 /* =========================================
@@ -130,29 +149,31 @@ header button:hover {
 .kpi-container {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  padding: 10px 14px;
-  background: #eef1f5;
+  gap: 8px;
+  padding: 7px 12px;
+  background: #f3f6fa;
 }
 
 .kpi-card {
-  background: #fff;
-  border: 1px solid #d5d9e0;
-  border-radius: 6px;
-  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #dce3ec;
+  border-left: 3px solid #38a3a5;
+  border-radius: 7px;
+  padding: 7px 11px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .kpi-label {
-  font-size: 0.78rem;
-  color: #666;
+  font-size: 0.70rem;
+  color: #64748b;
 }
 
 .kpi-card strong {
-  font-size: 1.45rem;
-  color: #1f4e79;
+  font-size: 1.2rem;
+  color: #176b78;
 }
 
 /* =========================================
@@ -166,43 +187,45 @@ header button:hover {
 }
 
 .view.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 /* =========================================
-   6. GRILLE DES GRAPHIQUES
+   6. CONTENU PRINCIPAL ET GRILLE
 ========================================= */
 
 main {
-  padding: 10px 14px 16px;
+  padding: 7px 12px 9px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 320px;
-  gap: 12px;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  flex: 1;
+  min-height: 0;
 }
 
-/* En vue globale, les graphiques détaillés sont cachés */
+/* Vue détaillée : 3 colonnes et 2 lignes */
 
-/* Graphiques et panneau masqués en vue globale 
-.detail-only {
-  display: none;
+#view-overview.detail-mode .dashboard-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-*/
-/* Graphiques et panneau affichés en vue détaillée 
-#view-overview.detail-mode .detail-only {
-  display: flex;
-}
-*/
-/* Vue globale : masquer les éléments de détail */
+/* Masquer les éléments détaillés en vue globale */
+
 #view-overview:not(.detail-mode) .detail-only {
   display: none !important;
 }
 
-/* Vue détaillée : afficher les éléments de détail */
+/* Afficher les éléments détaillés en vue détaillée */
+
 #view-overview.detail-mode .detail-only {
   display: flex !important;
 }
@@ -212,44 +235,49 @@ main {
 ========================================= */
 
 .panel {
-  background: #fff;
-  border: 1px solid #d5d9e0;
+  background: #ffffff;
+  border: 1px solid #dce3ec;
   border-radius: 7px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  padding: 10px;
+  padding: 7px;
+  box-shadow: 0 1px 3px rgba(30, 55, 80, 0.04);
 }
 
 .head {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 5px;
   flex-wrap: wrap;
-  min-height: 34px;
+  min-height: 27px;
 }
 
 .head h2 {
-  font-size: 0.92rem;
+  font-size: 0.80rem;
   margin: 0;
+  color: #243f5d;
 }
 
 .head .sub {
-  font-size: 0.72rem;
-  color: #666;
+  font-size: 0.65rem;
+  color: #718096;
 }
 
 .head .ctl {
   margin-left: auto;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 .head select {
-  font-size: 0.75rem;
+  font-size: 0.70rem;
+  padding: 3px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
 }
 
 .chart {
@@ -262,9 +290,10 @@ main {
 
 .grad {
   display: inline-block;
-  width: 60px;
-  height: 8px;
-  background: linear-gradient(to right, #f7fbff, #08306b);
+  width: 50px;
+  height: 7px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #f7fbff, #176b78);
 }
 
 svg {
@@ -273,7 +302,7 @@ svg {
 
 svg text {
   font-size: 10px;
-  fill: #444;
+  fill: #526176;
 }
 
 /* =========================================
@@ -281,23 +310,25 @@ svg text {
 ========================================= */
 
 .detail-panel {
-  margin-top: 12px;
-  min-height: 160px;
-}
-
-#detail-content {
-  padding: 8px 2px;
-  font-size: 0.88rem;
-  color: #444;
-  line-height: 1.5;
-}
-
-#detail-content p {
-  margin: 4px 0;
+  flex: 0 0 85px;
+  min-height: 0;
+  margin-top: 7px;
+  overflow: auto;
 }
 
 #detail-title {
-  color: #1f4e79;
+  color: #176b78;
+}
+
+#detail-content {
+  padding: 3px 2px;
+  font-size: 0.76rem;
+  color: #526176;
+  line-height: 1.35;
+}
+
+#detail-content p {
+  margin: 2px 0;
 }
 
 /* =========================================
@@ -308,13 +339,14 @@ svg text {
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  background: #222;
-  color: #fff;
+  background: #183153;
+  color: #ffffff;
   padding: 6px 9px;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 12px;
   line-height: 1.4;
-  z-index: 10;
+  z-index: 100;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 #message .error {
@@ -323,31 +355,72 @@ svg text {
 }
 
 /* =========================================
-   10. ADAPTATION AUX ECRANS PLUS PETITS
+   10. ECRANS INTERMEDIAIRES
 ========================================= */
 
-@media (max-width: 900px) {
-  .kpi-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 1100px) {
+
+  body {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: 300px;
+  .view.active {
+    display: block;
+  }
+
+  main {
+    overflow: visible;
+  }
+
+  .dashboard-grid,
+  #view-overview.detail-mode .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    grid-auto-rows: 240px;
+  }
+
+  .detail-panel {
+    min-height: 100px;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+  }
+}
+
+/* =========================================
+   11. PETITS ECRANS
+========================================= */
+
+@media (max-width: 650px) {
+
+  header {
+    align-items: flex-start;
   }
 
   header h1 {
     width: 100%;
   }
 
+  .filters {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  header select {
+    width: 140px;
+    max-width: 100%;
+  }
+
   #count {
     margin-left: 0;
+    text-align: left;
   }
-}
 
-@media (max-width: 500px) {
   .kpi-container {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 8px;
   }
 
@@ -356,11 +429,17 @@ svg text {
   }
 
   .kpi-card strong {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   main {
     padding: 8px;
+  }
+
+  .dashboard-grid,
+  #view-overview.detail-mode .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 260px;
   }
 
   .view-navigation {
@@ -372,4 +451,265 @@ svg text {
     padding: 9px 6px;
     font-size: 0.8rem;
   }
+
+  .detail-panel {
+    min-height: 110px;
+  }
+}
+
+
+
+/* =========================================
+   THEME BLEU NUIT — IDENTITE VISUELLE
+========================================= */
+
+:root {
+  --navy: #14243A;
+  --navy-light: #233D5B;
+  --blue-petrol: #397A91;
+  --turquoise: #70B8B2;
+  --blue-pale: #D8E7EF;
+  --background: #F1F5F9;
+  --border: #D7E0E9;
+  --text: #26384D;
+  --muted: #718096;
+}
+
+/* Fond général */
+
+body {
+  background: var(--background);
+  color: var(--text);
+}
+
+/* En-tête */
+
+header {
+  background: var(--navy);
+  border-bottom: 1px solid var(--navy-light);
+}
+
+header h1 {
+  color: #FFFFFF;
+}
+
+header label {
+  color: var(--blue-pale);
+}
+
+header select {
+  background: #FFFFFF;
+  border-color: #B9C9D8;
+  color: var(--navy);
+}
+
+/* Boutons */
+
+header button {
+  background: var(--blue-petrol);
+  border-color: var(--blue-petrol);
+  color: #FFFFFF;
+}
+
+header button:hover {
+  background: var(--navy-light);
+}
+
+#count {
+  color: var(--turquoise);
+}
+
+/* Navigation */
+
+.view-navigation {
+  background: var(--background);
+}
+
+.nav-btn {
+  background: #E2EAF1;
+  border-color: var(--border);
+  color: var(--navy-light);
+}
+
+.nav-btn:hover {
+  background: #FFFFFF;
+}
+
+.nav-btn.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #FFFFFF;
+}
+
+/* Indicateurs KPI */
+
+.kpi-container {
+  background: var(--background);
+}
+
+.kpi-card {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--blue-petrol);
+  box-shadow: 0 2px 6px rgba(20, 36, 58, 0.05);
+}
+
+.kpi-card:nth-child(2) {
+  border-left-color: var(--turquoise);
+}
+
+.kpi-card:nth-child(3) {
+  border-left-color: #527DA5;
+}
+
+.kpi-card:nth-child(4) {
+  border-left-color: var(--navy-light);
+}
+
+.kpi-card strong {
+  color: var(--navy);
+}
+
+/* Cartes des graphiques */
+
+.panel {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 7px rgba(20, 36, 58, 0.06);
+  transition: box-shadow 0.2s ease,
+              border-color 0.2s ease;
+}
+
+.panel:hover {
+  border-color: #A9C1D2;
+  box-shadow: 0 4px 12px rgba(20, 36, 58, 0.09);
+}
+
+/* Titres */
+
+.head h2 {
+  color: var(--navy);
+}
+
+.head .sub {
+  color: var(--muted);
+}
+
+/* Sélecteur de métrique */
+
+.head select {
+  background: #F7FAFC;
+  border-color: var(--border);
+  color: var(--navy);
+}
+
+/* Textes des graphiques */
+
+svg text {
+  fill: #52657A;
+}
+
+/* Panneau de détails */
+
+.detail-panel {
+  border-top: 3px solid var(--blue-petrol);
+}
+
+#detail-title {
+  color: var(--navy);
+}
+
+#detail-content {
+  color: var(--text);
+}
+
+/* Infobulles */
+
+#tooltip {
+  background: var(--navy);
+  border: 1px solid var(--blue-petrol);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(20, 36, 58, 0.2);
+}
+
+/* Message d'erreur */
+
+#message .error {
+  color: #B54747;
+}
+
+
+/* =========================================
+   FINITIONS DES GRAPHIQUES D3
+========================================= */
+
+/* Textes et graduations */
+
+.chart svg text {
+  fill: #52657A;
+  font-family: system-ui, sans-serif;
+}
+
+/* Axes */
+
+.chart svg .domain,
+.chart svg .tick line {
+  stroke: #C7D3DF;
+}
+
+/* Titres des axes */
+
+.chart svg text:not(.lab) {
+  font-size: 10px;
+}
+
+/* Cases de la heatmap */
+
+.chart svg .c text {
+  font-weight: 600;
+}
+
+/* Barre de légende de la heatmap */
+
+.grad {
+  background: linear-gradient(
+    to right,
+    #D8E7EF,
+    #8AAFC3,
+    #397A91,
+    #14243A
+  );
+}
+
+/* Transitions visuelles */
+
+.chart svg circle,
+.chart svg rect {
+  transition: opacity 0.2s ease;
+}
+
+/* Lignes de référence discrètes */
+.chart svg .tick line {
+  stroke: #E5EBF1;
+}
+
+/* Axes principaux */
+.chart svg .domain {
+  stroke: #B8C7D5;
+}
+
+/* Survol des panneaux */
+.panel:hover .head h2 {
+  color: var(--blue-petrol);
+}
+
+/* Curseur interactif sur les graphiques */
+.chart svg circle,
+.chart svg rect {
+  cursor: pointer;
+}
+
+/* Survol des éléments interactifs */
+.chart svg circle:hover {
+  stroke: var(--navy);
+  stroke-width: 2px;
 }

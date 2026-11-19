@@ -225,11 +225,49 @@ function init(rows) {
   const byCount = (arr, k) => d3.rollups(arr, g => g.length, d => d[k]).sort((a, b) => b[1] - a[1]).map(d => d[0]);
   paysOrder = byCount(data.filter(d => d.pays !== NR && d.edu !== NR), "pays");
   objs = byCount(data, "objectif");
-  const pal = d3.scaleOrdinal(d3.schemeTableau10).domain(objs.filter(o => o !== NR));
-  colorObj = o => o === NR ? "#9a9a9a" : pal(o);
+  
+  // Palette variée pour les objectifs : une couleur par catégorie
+  const objectColors = [
+    "#4776A8", // bleu
+    "#E3A34B", // orange
+    "#7A6BB7", // violet
+    "#D47779", // rouge doux
+    "#68A68A", // vert
+    "#B58A65", // brun
+    "#6F91A8", // bleu-gris
+    "#C06C9B", // rose
+    "#8795A5"  // gris
+  ];
+
+  const validObjectives = objs.filter(o => o !== NR);
+
+  const pal = d3.scaleOrdinal()
+    .domain(validObjectives)
+    .range(objectColors);
+
+  colorObj = o => o === NR ? "#AAB5C1" : pal(o);
+
+
+  // Palette variée pour les outils d'IA
   const tools = byCount(data.filter(d => d.outil !== NR), "outil");
-  const palT = d3.scaleOrdinal(d3.schemeTableau10).domain(tools);
-  colorTool = t => palT(t);
+
+  const toolColors = [
+    "#315F91", // bleu foncé
+    "#D18B37", // orange
+    "#7966AD", // violet
+    "#4F927F", // vert
+    "#C96F75", // rouge
+    "#668CA8", // bleu-gris
+    "#A77B58", // brun
+    "#C06C9B", // rose
+    "#8993A3"  // gris
+  ];
+
+  const palT = d3.scaleOrdinal()
+    .domain(tools)
+    .range(toolColors);
+
+  colorTool = t => t === NR ? "#AAB5C1" : palT(t);
 
   // Menus de filtres
   const fill = (k, values) => d3.select("#f-" + k).selectAll("option").data(["", ...values]).join("option")
@@ -308,7 +346,7 @@ function drawBubble() {
   g.selectAll("circle").data(tools).join("circle").style("cursor", "pointer")
     .attr("cx", d => x(d.prec)).attr("cy", d => y(d.sat)).attr("r", rad)
     .attr("fill", d => colorTool(d.outil)).attr("fill-opacity", d => faded(d) ? 0.2 : 0.75)
-    .attr("stroke", d => d.outil === F.outil ? "#000" : "#fff").attr("stroke-width", d => d.outil === F.outil ? 2.5 : 1)
+    .attr("stroke", d => d.outil === F.outil ? "#70B8B2" : "#FFFFFF").attr("stroke-width", d => d.outil === F.outil ? 2.5 : 1)
     .on("mousemove", (e, d) => showTip(e, `<b>${d.outil}</b><br>${d.n} utilisateurs<br>Précision : ${f1(d.prec)} / 5<br>Satisfaction : ${f1(d.sat)} / 10`))
     .on("mouseout", hideTip)
     .on("click", (e, d) => {toggle("outil", d.outil);showToolDetail(d.outil);
@@ -318,7 +356,7 @@ function drawBubble() {
   g.selectAll("text.lab").data(tools).join("text").attr("class", "lab").style("pointer-events", "none")
     .attr("x", d => right(d) ? x(d.prec) - rad(d) - 4 : x(d.prec) + rad(d) + 4)
     .attr("text-anchor", d => right(d) ? "end" : "start").attr("y", d => y(d.sat) + 3.5)
-    .style("paint-order", "stroke").style("stroke", "#fff").style("stroke-width", "3px")
+    .style("paint-order", "stroke").style("stroke", "#FFFFFF").style("stroke-width", "3px")
     .attr("opacity", d => faded(d) ? 0.4 : 1).text(d => d.outil);
 }
 
@@ -385,7 +423,7 @@ function drawScatter() {
       .attr("r", 4)
       .attr("fill", d => colorObj(d.objectif))
       .attr("fill-opacity", opacity)
-      .attr("stroke", "#fff")
+      .attr("stroke", "#FFFFFF")
       .attr("stroke-width", 0.7)
       .style("cursor", "pointer")
 
@@ -433,7 +471,8 @@ function drawScatter() {
       .attr("x2", x(xmax * 1.05))
       .attr("y1", y(intercept))
       .attr("y2", y(intercept + slope * xmax * 1.05))
-      .attr("stroke", "#333")
+      .attr("stroke", "#D18B37")
+      .attr("stroke-width", 2)
       .attr("stroke-dasharray", "5 4");
 
     const r = sxy / Math.sqrt(sxx * syy);
@@ -462,7 +501,15 @@ function drawHeat() {
   }
   cells.forEach(c => c.value = metric === "n" ? c.n : c.h);
   const vmax = d3.max(cells, c => c.value) || 1;
-  const color = d3.scaleSequential(d3.interpolateBlues).domain([0, vmax]);
+  const color = d3.scaleSequential()
+  .domain([0, vmax])
+  .interpolator(d3.interpolateRgbBasis([
+    "#F1F5F9", // très faible : presque blanc
+    "#A9D6E5", // faible : bleu clair
+    "#4A90B8", // moyen : bleu soutenu
+    "#24547A", // élevé : bleu foncé
+    "#14243A"  // très élevé : bleu nuit
+  ]));
   d3.select("#lgmax").text(f1(vmax).replace(".0", ""));
   const m = { top: 22, right: 4, bottom: 4, left: 70 }, iw = w - m.left - m.right, ih = h - m.top - m.bottom;
   const x = d3.scaleBand(EDU, [0, iw]).padding(0.06), y = d3.scaleBand(paysOrder, [0, ih]).padding(0.06);
@@ -475,9 +522,17 @@ function drawHeat() {
   const cg = g.selectAll("g.c").data(cells).join("g").attr("class", "c").style("cursor", "pointer")
     .attr("opacity", c => anySel && !active(c) ? 0.35 : 1);
   cg.append("rect").attr("x", c => x(c.e)).attr("y", c => y(c.p)).attr("width", x.bandwidth()).attr("height", y.bandwidth())
-    .attr("fill", c => has(c) ? color(c.value) : "#ececec").attr("stroke", c => exact && active(c) ? "#000" : "none").attr("stroke-width", 2);
-  cg.append("text").attr("x", c => x(c.e) + x.bandwidth() / 2).attr("y", c => y(c.p) + y.bandwidth() / 2 + 3.5).attr("text-anchor", "middle")
-    .style("fill", c => has(c) && c.value > vmax * 0.55 ? "#fff" : "#222").text(c => !has(c) ? "" : metric === "n" ? c.n : f1(c.value));
+    .attr("fill", c => has(c) ? color(c.value) : "#E8EDF2")
+    .attr("stroke", c => exact && active(c) ? "#70B8B2" : "none")
+    .attr("stroke-width", 2);
+  cg.append("text")
+    .attr("x", c => x(c.e) + x.bandwidth() / 2)
+    .attr("y", c => y(c.p) + y.bandwidth() / 2 + 3.5)
+    .attr("text-anchor", "middle")
+    .style("font-weight", 700)
+    .style("font-size", "11px")
+    .style("fill", c => has(c) && c.value > vmax * 0.45 ? "#FFFFFF" : "#14243A")
+    .text(c => !has(c) ? "" : metric === "n" ? c.n : f1(c.value));
   cg.on("mousemove", (ev, c) => showTip(ev, `<b>${c.p} · ${c.e}</b><br>${c.n} répondants<br>Usage moyen : ${Number.isFinite(c.h) ? f1(c.h) + " h/jour" : "n/a"}`))
     .on("mouseout", hideTip)
     .on("click", (ev, c) => {   // la case fixe deux filtres à la fois : pays et niveau d'éducation
@@ -503,7 +558,7 @@ function drawHist() {
   g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).tickSize(0));
   g.append("g").call(d3.axisLeft(y).ticks(Math.min(4, d3.max(items, d => d.v) || 1)).tickFormat(d3.format("d")));
   g.selectAll("rect").data(items).join("rect").attr("x", d => x(d.k)).attr("y", d => y(d.v)).attr("width", x.bandwidth()).attr("height", d => ih - y(d.v))
-    .attr("fill", F.outil ? colorTool(F.outil) : "#4e79a7")
+    .attr("fill", "#7966AD")
     .on("mousemove", (e, d) => showTip(e, `Note ${d.k} : ${d.v} utilisateurs`)).on("mouseout", hideTip);
   g.append("text").attr("x", iw / 2).attr("y", ih + 26).attr("text-anchor", "middle").text("Note de satisfaction");
 }
