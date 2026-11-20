@@ -8,9 +8,9 @@ Le tableau de bord permet de comparer les outils et les objectifs, d’examiner 
 informations présentes sur le site ou les données ont été récupérées. Il s'agit nottement du revenue pour lequel il n'y a aucune présicion sur le fait qu'il soit convertir en dollars pour tous les pays, ou s'il était enregsitré selon la devise de chaque pays.  
 
 ## Présentation de l'équipe
-Mourichidatou BIOKOU
-Yohan MÉNAGER
-Nirisoa RATSIMBAZAFY
+- Mourichidatou BIOKOU
+- Yohan MÉNAGER
+- Nirisoa RATSIMBAZAFY
 
 ## Utilisateurs visés et besoins
 
