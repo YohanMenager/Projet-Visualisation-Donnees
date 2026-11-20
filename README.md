@@ -7,6 +7,11 @@ Le projet porte sur la transformation d'un jeu de données de réponses à une e
 Le tableau de bord permet de comparer les outils et les objectifs, d’examiner la satisfaction et les habitudes d’utilisation, puis de croiser les résultats avec le pays et le niveau d’études. Des filtres coordonnés, des indicateurs synthétiques, des infobulles et des détails accessibles au clic soutiennent l’exploration. Les vues répondent à des questions descriptives sur les répondants observés : elles ne démontrent pas, à elles seules, qu’un outil cause un gain de productivité, et l’échantillon ne doit pas être considéré comme représentatif sans analyse supplémentaire étant données que certaines données n'ont pas pu être justifier au regard des
 informations présentes sur le site ou les données ont été récupérées. Il s'agit nottement du revenue pour lequel il n'y a aucune présicion sur le fait qu'il soit convertir en dollars pour tous les pays, ou s'il était enregsitré selon la devise de chaque pays.  
 
+## Présentation de l'équipe
+Mourichidatou BIOKOU
+Yohan MÉNAGER
+Nirisoa RATSIMBAZAFY
+
 ## Utilisateurs visés et besoins
 
 ### Utilisateur 1   : Etablissement universitaire et écoles (Etudiants et enseignants )
